@@ -10,9 +10,12 @@ jobs:
         with:
           java-version: 17.0.6
           distribution: 'zulu'
-      - name: Build with Gradle
-        run: ./gradlew clean build
-      - uses: graalvm/setup-graalvm@v1
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Build with Gradle wrapper
+        run: ./gradlew build
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
           version: '22.3.1'
           java-version: '17'
