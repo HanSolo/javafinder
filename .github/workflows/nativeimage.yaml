@@ -9,11 +9,11 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17.0.6
-          distribution: 'zulu'
+          distribution: zulu
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-      - name: Build with Gradle wrapper
-        run: ./gradlew build
+      - name: Build with Gradle
+        run: ./gradlew build --scan
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: JavaFinder-mac-x64
-          path: javafinder*
+          path: JavaFinder*
 
 
   build-linux:
@@ -38,10 +38,13 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17.0.6
-          distribution: 'zulu'
+          distribution: zulu
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Build with Gradle
-        run: ./gradlew clean build
-      - uses: graalvm/setup-graalvm@v1
+        run: ./gradlew build --scan
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
           version: '22.3.1'
           java-version: '17'
@@ -54,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: JavaFinder-linux-x64
-          path: javafinder*
+          path: JavaFinder*
 
 
   build-windows:
@@ -65,10 +68,13 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17.0.6
-          distribution: 'zulu'
+          distribution: zulu
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
       - name: Build with Gradle
-        run: ./gradlew clean build
-      - uses: graalvm/setup-graalvm@v1
+        run: ./gradlew build --scan
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
           version: '22.3.1'
           java-version: '17'
@@ -80,4 +86,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: JavaFinder-windows-x64
-          path: javafinder*
+          path: JavaFinder*
