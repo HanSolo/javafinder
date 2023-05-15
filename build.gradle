@@ -27,6 +27,8 @@ normalization {
     runtimeClasspath { ignore('/META-INF/MANIFEST.MF') }
 }
 
+compileJava.options.verbose = true
+
 repositories {
     mavenCentral()
 }
