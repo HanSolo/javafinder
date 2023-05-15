@@ -24,3 +24,9 @@ hs_err_pid*
 replay_pid*
 /.gradle
 /.idea
+/build
+
+JavaFinder
+JavaFinder.build_artifacts.txt
+.DS_Store
+

@@ -46,10 +46,8 @@ application {
 }
 
 dependencies {
-    implementation      'eu.hansolo:jdktools:17.0.27'
-    implementation      'com.google.gradle:osdetector-gradle-plugin:1.7.3'
-    implementation      'info.picocli:picocli:4.7.3'
-    annotationProcessor 'info.picocli:picocli-codegen:4.7.3'
+    implementation 'eu.hansolo:jdktools:17.0.27'
+    implementation 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
 }
 
 compileJava {
