@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'signing'
@@ -12,11 +12,13 @@ plugins {
 
 apply plugin: 'signing'
 
+/*
 normalization {
     runtimeClasspath {
         ignore('/META-INF/MANIFEST.MF')
     }
 }
+*/
 
 repositories {
     mavenCentral()
@@ -49,11 +51,14 @@ dependencies {
     implementation 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
 }
 
+/*
 compileJava {
     options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 }
+*/
 
 jar {
+    /*
     from {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         configurations.runtimeClasspath.collect {  it.isDirectory() ? it : zipTree(it)  }
@@ -62,7 +67,7 @@ jar {
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
     }
-
+    */
     manifest {
         attributes(
                 'Built-By'              : System.properties['user.name'],
@@ -89,6 +94,7 @@ shadowJar {
     archiveClassifier.set('fat');
 }
 
+/*
 run {
     inputs.property("moduleName", moduleName)
     doFirst {
@@ -99,6 +105,7 @@ run {
         classpath = files()
     }
 }
+*/
 
 /*
 task copyDependencies(type: Copy) {
