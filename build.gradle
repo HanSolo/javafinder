@@ -83,7 +83,8 @@ jar {
                 'Bundle-SymbolicName'   : 'eu.hansolo.javafinder',
                 //'Class-Path'            : '${project.name}-${project.version}-fat.jar',
                 //'Main-Class'            : 'eu.hansolo.javafinder.Main'
-                'Class-Path'            : configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
+                //'Class-Path'            : configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
+                'Class-Path'            : configurations.runtimeClasspath.collect { it.getName() }.join(' '),
                 'Main-Class'            : application.mainClass.get()
         )
     }
