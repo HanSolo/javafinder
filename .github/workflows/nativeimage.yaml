@@ -2,9 +2,7 @@ name: BuildNativeImage
 on: [push, pull_request]
 jobs:
   build-macos:
-
     runs-on: [ macos-latest ]
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17.0.6
@@ -15,7 +13,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: PASSPHRASE
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew assemble
         env:
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
@@ -35,9 +33,7 @@ jobs:
 
 
   build-linux:
-
     runs-on: [ ubuntu-latest ]
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17.0.6
@@ -48,7 +44,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: PASSPHRASE
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew assemble
         env:
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
@@ -59,7 +55,7 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Linux
-        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=JavaFinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=JavaFinder eu.hansolo.javafinder.Main --no-fallback --static
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
@@ -69,9 +65,7 @@ jobs:
 
 
   build-windows:
-
     runs-on: [ windows-latest ]
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17.0.6
@@ -82,7 +76,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: PASSPHRASE
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew assemble
         env:
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
