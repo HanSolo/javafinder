@@ -7,19 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static eu.hansolo.javafinder.Constants.FIELD_ARCHITECTURE;
-import static eu.hansolo.javafinder.Constants.FIELD_BIT;
-import static eu.hansolo.javafinder.Constants.FIELD_DISTRIBUTIONS;
-import static eu.hansolo.javafinder.Constants.FIELD_OPERATING_SYSTEM;
-import static eu.hansolo.javafinder.Constants.FIELD_SEARCH_PATH;
-import static eu.hansolo.javafinder.Constants.FIELD_SYSINFO;
-import static eu.hansolo.jdktools.Constants.COLON;
-import static eu.hansolo.jdktools.Constants.COMMA;
-import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_CLOSE;
-import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_OPEN;
-import static eu.hansolo.jdktools.Constants.QUOTES;
-import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_CLOSE;
-import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_OPEN;
+import static eu.hansolo.javafinder.Constants.*;
+import static eu.hansolo.jdktools.Constants.*;
 
 
 public class Main {
