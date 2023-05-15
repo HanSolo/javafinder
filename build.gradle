@@ -2,7 +2,6 @@ import java.text.SimpleDateFormat
 
 plugins {
     id 'java'
-    //id 'java-library'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'signing'
@@ -50,11 +49,9 @@ dependencies {
     implementation 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
 }
 
-/*
 compileJava {
     options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 }
-*/
 
 jar {
     from {
@@ -81,8 +78,9 @@ jar {
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description'    : description,
                 'Bundle-SymbolicName'   : 'eu.hansolo.javafinder',
-                'Class-Path'            : '${project.name}-${project.version}-fat.jar',
-                'Main-Class'            : 'eu.hansolo.javafinder.Main'
+                //'Class-Path'            : '${project.name}-${project.version}-fat.jar',
+                //'Main-Class'            : 'eu.hansolo.javafinder.Main'
+                'Main-Class'            : application.mainClass.get()
         )
     }
 }
@@ -102,11 +100,13 @@ run {
     }
 }
 
+/*
 task copyDependencies(type: Copy) {
     from(configurations.runtimeClasspath)
     into "${buildDir}/dependencies/flat"
 }
 assemble.dependsOn(copyDependencies)
+*/
 
 signing {
     if (gpgkey && gpgpassphrase) {
