@@ -1,0 +1,101 @@
+name: BuildNativeImage
+on: [push, pull_request]
+jobs:
+  build-macos:
+
+    runs-on: [ macos-latest ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17.0.6
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17.0.6
+          distribution: 'zulu'
+          gpg-private-key: ${{ secrets.GPG_KEY }}
+          gpg-passphrase: PASSPHRASE
+      - name: Build with Gradle
+        run: ./gradlew build
+        env:
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: '22.3.1'
+          java-version: '17'
+          components: 'native-image'
+
+      - name: Build native-image on Macos
+        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=JavaFinder eu.hansolo.javafinder.Main --no-fallback
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: JavaFinder-mac-x64
+          path: javafinder*
+
+
+  build-linux:
+
+    runs-on: [ ubuntu-latest ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17.0.6
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17.0.6
+          distribution: 'zulu'
+          gpg-private-key: ${{ secrets.GPG_KEY }}
+          gpg-passphrase: PASSPHRASE
+      - name: Build with Gradle
+        run: ./gradlew build
+        env:
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: '22.3.1'
+          java-version: '17'
+          components: 'native-image'
+
+      - name: Build native-image on Linux
+        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=JavaFinder eu.hansolo.javafinder.Main --no-fallback
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: JavaFinder-linux-x64
+          path: javafinder*
+
+
+  build-windows:
+
+    runs-on: [ windows-latest ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17.0.6
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17.0.6
+          distribution: 'zulu'
+          gpg-private-key: ${{ secrets.GPG_KEY }}
+          gpg-passphrase: PASSPHRASE
+      - name: Build with Gradle
+        run: ./gradlew build
+        env:
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: '22.3.1'
+          java-version: '17'
+          components: 'native-image'
+
+      - name: Build native-image on Windows
+        run: native-image -jar ".\build\libs\javafinder-17.0.0-fat.jar" --initialize-at-build-time=Constants -H:Name=JavaFinder eu.hansolo.javafinder.Main --no-fallback --static
+      - name: Upload binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: JavaFinder-windows-x64
+          path: javafinder*
