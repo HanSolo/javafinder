@@ -1,17 +1,5 @@
 import java.text.SimpleDateFormat
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
-    }
-}
-
 plugins {
     id 'java'
     id 'application'
@@ -19,13 +7,6 @@ plugins {
     id 'com.google.osdetector'           version '1.7.3'
     id 'net.nemerosa.versioning'         version '3.0.0'
 }
-
-
-normalization {
-    runtimeClasspath { ignore('/META-INF/MANIFEST.MF') }
-}
-
-compileJava.options.verbose = true
 
 repositories {
     mavenCentral()
@@ -79,10 +60,9 @@ jar {
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description'    : 'JavaFinder is a little tool that helps you to find all installed Java versions in a given path',
                 'Bundle-SymbolicName'   : 'eu.hansolo.javafinder',
-                //'Class-Path'            : '${project.name}-${project.version}-fat.jar',
-                //'Main-Class'            : 'eu.hansolo.javafinder.Main'
+                'Class-Path'            : '${project.name}-${project.version}-fat.jar',
                 //'Class-Path'            : configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
-                'Class-Path'            : configurations.runtimeClasspath.collect { it.getName() }.join(' '),
+                //'Class-Path'            : configurations.runtimeClasspath.collect { it.getName() }.join(' '),
                 'Main-Class'            : application.mainClass.get()
         )
     }
