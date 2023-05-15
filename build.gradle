@@ -6,7 +6,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'signing'
     id 'com.google.osdetector'           version '1.7.3'
-    id 'org.javamodularity.moduleplugin' version '1.8.12'
+    //id 'org.javamodularity.moduleplugin' version '1.8.12'
     id 'net.nemerosa.versioning'         version '3.0.0'
 }
 
