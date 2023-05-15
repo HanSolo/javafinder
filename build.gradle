@@ -1,0 +1,117 @@
+import java.text.SimpleDateFormat
+
+plugins {
+    id 'java'
+    //id 'java-library'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'signing'
+    id 'com.google.osdetector'           version '1.7.3'
+    id 'org.javamodularity.moduleplugin' version '1.8.12'
+    id 'net.nemerosa.versioning'         version '3.0.0'
+}
+
+apply plugin: 'signing'
+
+normalization {
+    runtimeClasspath {
+        ignore('/META-INF/MANIFEST.MF')
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+Date buildTimeAndDate = new Date()
+ext {
+    buildDate       = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
+    buildTime       = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
+    platform        = osdetector.os == 'osx' ? osdetector.arch == 'aarch_64' ? 'mac-aarch64' : 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os == 'linux' ? osdetector.arch == 'aarch_64' ? 'linux-aarch64' : 'linux' : osdetector.os
+    ciOssrhUsername = System.getenv('OSSRH_USERNAME')
+    ciOssrhPassword = System.getenv('OSSRH_PASSWORD')
+    ciGHUser        = System.getenv('GH_USER')
+    ciGHToken       = System.getenv('GH_TOKEN')
+    gpgkey          = System.getenv("GPG_PRIVATE_KEY")
+    gpgpassphrase   = System.getenv("PASSPHRASE")
+}
+
+
+mainClassName = 'eu.hansolo.javafinder.Main'
+description   = 'JavaFinder is a little tool that helps you to find all installed Java versions in a given path'
+
+application {
+    mainModule = 'eu.hansolo.javafinder'
+    mainClass  = 'eu.hansolo.javafinder.Main'
+}
+
+dependencies {
+    implementation      'eu.hansolo:jdktools:17.0.27'
+    implementation      'com.google.gradle:osdetector-gradle-plugin:1.7.3'
+    implementation      'info.picocli:picocli:4.7.3'
+    annotationProcessor 'info.picocli:picocli-codegen:4.7.3'
+}
+
+compileJava {
+    options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
+}
+
+jar {
+    from {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations.runtimeClasspath.collect {  it.isDirectory() ? it : zipTree(it)  }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+
+    manifest {
+        attributes(
+                'Built-By'              : System.properties['user.name'],
+                'Created-By'            : System.properties['java.version'] + " (" + System.properties['java.vendor'] + " " + System.properties['java.vm.version'] + ")",
+                'Build-Date'            : project.buildDate,
+                'Build-Time'            : project.buildTime,
+                'Build-Revision'        : versioning.info.commit,
+                'Specification-Title'   : project.name,
+                'Specification-Version' : project.version,
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': project.version,
+                'Bundle-Name'           : project.name,
+                'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
+                'Bundle-Description'    : description,
+                'Bundle-SymbolicName'   : 'eu.hansolo.javafinder',
+                'Class-Path'            : '${project.name}-${project.version}.jar',
+                'Main-Class'            : 'eu.hansolo.javafinder.Main'
+        )
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('fat');
+}
+
+run {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--module', mainClassName
+        ]
+        classpath = files()
+    }
+}
+
+task copyDependencies(type: Copy) {
+    from(configurations.runtimeClasspath)
+    into "${buildDir}/dependencies/flat"
+}
+assemble.dependsOn(copyDependencies)
+
+signing {
+    if (gpgkey && gpgpassphrase) {
+        useInMemoryPgpKeys(gpgkey, gpgpassphrase)
+    }
+
+    sign configurations.archives
+}
