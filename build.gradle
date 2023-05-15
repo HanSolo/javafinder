@@ -60,7 +60,7 @@ jar {
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description'    : 'JavaFinder is a little tool that helps you to find all installed Java versions in a given path',
                 'Bundle-SymbolicName'   : 'eu.hansolo.javafinder',
-                'Class-Path'            : '${project.name}-${project.version}-fat.jar',
+                //'Class-Path'            : '${project.name}-${project.version}-fat.jar',
                 //'Class-Path'            : configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
                 //'Class-Path'            : configurations.runtimeClasspath.collect { it.getName() }.join(' '),
                 'Main-Class'            : application.mainClass.get()
