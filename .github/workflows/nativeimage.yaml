@@ -17,20 +17,19 @@ jobs:
         env:
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-#      - uses: graalvm/setup-graalvm@v1
-#        with:
-#          version: '22.3.1'
-#          java-version: '17'
-#          components: 'native-image'
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: '22.3.1'
+          java-version: '17'
+          components: 'native-image'
 
-#      - name: Build native-image on Macos
-#        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=JavaFinder eu.hansolo.javafinder.Main --no-fallback
+      - name: Build native-image on Macos
+        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=JavaFinder eu.hansolo.javafinder.Main --no-fallback
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
           name: JavaFinder-mac-x64
-          path: ./build/libs/**
- #         path: javafinder*
+          path: javafinder*
 
 
   build-linux:
