@@ -9,6 +9,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
+        classpath 'org.javamodularity:moduleplugin:1.8.12'
     }
 }
 
@@ -16,20 +17,19 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'signing'
     id 'com.google.osdetector'           version '1.7.3'
+    id 'org.javamodularity.moduleplugin' version '1.8.12'
     id 'net.nemerosa.versioning'         version '3.0.0'
 }
 
-apply plugin: 'signing'
-
 
 normalization {
-    runtimeClasspath {
-        ignore('/META-INF/MANIFEST.MF')
-    }
+    runtimeClasspath { ignore('/META-INF/MANIFEST.MF') }
 }
 
+repositories {
+    mavenCentral()
+}
 
 Date buildTimeAndDate = new Date()
 ext {
@@ -45,10 +45,6 @@ ext {
     gpgpassphrase   = System.getenv("PASSPHRASE")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation 'eu.hansolo:jdktools:17.0.27'
     implementation 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
@@ -58,12 +54,6 @@ application {
     mainModule = 'eu.hansolo.javafinder'
     mainClass  = 'eu.hansolo.javafinder.Main'
 }
-
-/*
-compileJava {
-    options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
-}
-*/
 
 jar {
     from {
@@ -101,7 +91,12 @@ shadowJar {
     archiveClassifier.set('fat');
 }
 
-/*
+sourceSets {
+    main {
+        output.setResourcesDir(java.classesDirectory)
+    }
+}
+
 run {
     inputs.property("moduleName", moduleName)
     doFirst {
@@ -111,21 +106,4 @@ run {
         ]
         classpath = files()
     }
-}
-*/
-
-/*
-task copyDependencies(type: Copy) {
-    from(configurations.runtimeClasspath)
-    into "${buildDir}/dependencies/flat"
-}
-assemble.dependsOn(copyDependencies)
-*/
-
-signing {
-    if (gpgkey && gpgpassphrase) {
-        useInMemoryPgpKeys(gpgkey, gpgpassphrase)
-    }
-
-    sign configurations.archives
 }
