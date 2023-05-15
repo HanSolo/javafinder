@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: JavaFinder-mac-x64
-          path: JavaFinder*
+          path: javafinder*
 
 
   build-linux:
@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: JavaFinder-linux-x64
-          path: JavaFinder*
+          path: javafinder*
 
 
   build-windows:
@@ -86,4 +86,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: JavaFinder-windows-x64
-          path: JavaFinder*
+          path: javafinder*
