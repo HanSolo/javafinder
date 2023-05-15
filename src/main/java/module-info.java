@@ -5,6 +5,8 @@ module eu.hansolo.javafinder {
     // 3rd party
     requires transitive eu.hansolo.jdktools;
 
+    opens eu.hansolo.javafinder to eu.hansolo.jdktools;
+
     // Exports
     exports eu.hansolo.javafinder;
 }
