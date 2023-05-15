@@ -10,13 +10,8 @@ jobs:
         with:
           java-version: 17.0.6
           distribution: 'zulu'
-          gpg-private-key: ${{ secrets.GPG_KEY }}
-          gpg-passphrase: PASSPHRASE
       - name: Build with Gradle
         run: ./gradlew clean build
-        env:
-          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
       - uses: graalvm/setup-graalvm@v1
         with:
           version: '22.3.1'
@@ -41,13 +36,8 @@ jobs:
         with:
           java-version: 17.0.6
           distribution: 'zulu'
-          gpg-private-key: ${{ secrets.GPG_KEY }}
-          gpg-passphrase: PASSPHRASE
       - name: Build with Gradle
         run: ./gradlew clean build
-        env:
-          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
       - uses: graalvm/setup-graalvm@v1
         with:
           version: '22.3.1'
@@ -73,13 +63,8 @@ jobs:
         with:
           java-version: 17.0.6
           distribution: 'zulu'
-          gpg-private-key: ${{ secrets.GPG_KEY }}
-          gpg-passphrase: PASSPHRASE
       - name: Build with Gradle
         run: ./gradlew clean build
-        env:
-          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
       - uses: graalvm/setup-graalvm@v1
         with:
           version: '22.3.1'
