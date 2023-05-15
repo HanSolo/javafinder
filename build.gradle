@@ -1,5 +1,17 @@
 import java.text.SimpleDateFormat
 
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
+    }
+}
+
 plugins {
     id 'java'
     id 'application'
