@@ -79,8 +79,7 @@ jar {
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description'    : description,
                 'Bundle-SymbolicName'   : 'eu.hansolo.javafinder',
-                'Export-Package'        : 'eu.hansolo.javafinder,eu.hansolo.jdktools,eu.hansolo.jdktools.scopes,eu.hansolo.jdktools.util,eu.hansolo.jdktools.versioning',
-                'Class-Path'            : '${project.name}-${project.version}.jar',
+                'Class-Path'            : '${project.name}-${project.version}-fat.jar',
                 'Main-Class'            : 'eu.hansolo.javafinder.Main'
         )
     }
