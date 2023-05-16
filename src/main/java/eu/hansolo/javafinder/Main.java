@@ -93,7 +93,7 @@ public class Main {
         StringBuilder msgBuilder;
         switch(outputType) {
             case CSV -> {
-                msgBuilder = new StringBuilder().append("vendor,distribution,version,location,buildscope")
+                msgBuilder = new StringBuilder().append("Vendor,Distribution,Version,Location,Type")
                                                 .append(NEW_LINE)
                                                 .append(distros.stream().map(distro -> distro.toString(OutputType.CSV)).collect(Collectors.joining()));
             }
