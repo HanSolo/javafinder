@@ -22,7 +22,9 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Macos
-        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        #run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
@@ -51,7 +53,8 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Linux
-        run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback --static
+        #run: native-image -jar ./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback --static
+        run: native-image -cp classes:./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
@@ -81,7 +84,9 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Windows
-        run: native-image -jar ".\build\libs\javafinder-17.0.0-fat.jar" --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback --static
+        #run: native-image -jar ".\build\libs\javafinder-17.0.0-fat.jar" --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback --static
+        run: native-image -cp classes:./build/libs/javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:

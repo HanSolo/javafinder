@@ -1,25 +1,24 @@
 package eu.hansolo.javafinder;
 
-import eu.hansolo.jdktools.util.OutputFormat;
-
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static eu.hansolo.javafinder.Constants.*;
-import static eu.hansolo.jdktools.Constants.*;
+import static eu.hansolo.javafinder.Constants.FIELD_ARCHITECTURE;
+import static eu.hansolo.javafinder.Constants.FIELD_BIT;
+import static eu.hansolo.javafinder.Constants.FIELD_DISTRIBUTIONS;
+import static eu.hansolo.javafinder.Constants.FIELD_OPERATING_SYSTEM;
+import static eu.hansolo.javafinder.Constants.FIELD_SEARCH_PATH;
+import static eu.hansolo.javafinder.Constants.FIELD_SYSINFO;
+import static eu.hansolo.jdktools.Constants.COLON;
+import static eu.hansolo.jdktools.Constants.COMMA;
+import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_CLOSE;
+import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_OPEN;
+import static eu.hansolo.jdktools.Constants.NEW_LINE;
+import static eu.hansolo.jdktools.Constants.QUOTES;
+import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_CLOSE;
+import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_OPEN;
 
 
 public class Main {
@@ -31,7 +30,10 @@ public class Main {
     }
     public Main(final String[] args) {
         this.finder = new Finder();
+        findJava(args);
+    }
 
+    private void findJava(final String[] args) {
         // System information
         final SysInfo sysInfo = Finder.getSysInfo();
 
@@ -79,15 +81,12 @@ public class Main {
             }
         }
 
-        File file = new File(searchPath);
-        if (!file.isDirectory()) {
-            file = file.getParentFile();
-        }
-        if (null == file || !file.exists()) {
+        // Check for valid searchPath
+        final File f = new File(searchPath);
+        if (!f.exists() || !f.isDirectory()) {
             System.out.println("Given path not found");
-            System.exit(0);
+            System.exit(1);
         }
-        file = null;
 
         Set<DistributionInfo> distros = finder.getDistributions(List.of(searchPath));
 
@@ -116,7 +115,6 @@ public class Main {
         System.out.println(msgBuilder);
         System.exit(0);
     }
-
 
     public static void main(String[] args) {
         new Main(args);
