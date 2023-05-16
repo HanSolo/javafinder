@@ -14,10 +14,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -84,8 +89,8 @@ public class Finder {
 
         searchPaths.forEach(searchPath -> {
             final Path       path      = Paths.get(searchPath);
-            final List<Path> javaFiles = findByFileName(path, javaFile);
-            //javaFiles.stream().filter(java -> !java.toString().contains("jre")).forEach(java -> checkForDistribution(java.toString(), distros));
+            //final List<Path> javaFiles = findByFileName(path, javaFile);
+            final List<Path> javaFiles = findFileByName(path, javaFile);
             javaFiles.stream().forEach(java -> checkForDistribution(java.toString(), distros));
         });
         service.shutdown();
@@ -215,9 +220,9 @@ public class Finder {
         }
     }
 
-    private JdkInfo getJdkInfo(final String jarFileName) {
+    private JdkInfo getJdkInfo(final String jarFilename) {
         try {
-            final JarFile                        jarFile      = new JarFile(jarFileName);
+            final JarFile                        jarFile      = new JarFile(jarFilename);
             final Manifest                       manifest     = jarFile.getManifest();
             final Attributes                     attributes   = manifest.getMainAttributes();
             final Optional<Entry<Object,Object>> optCreatedBy = attributes.entrySet().stream().filter(entry -> entry.getKey().toString().equalsIgnoreCase("Created-By")).findFirst();
@@ -230,18 +235,37 @@ public class Finder {
         }
     }
 
-    private List<Path> findByFileName(final Path path, final String fileName) {
+    private List<Path> findByFileName(final Path path, final String filename) {
         List<Path> result;
         try (Stream<Path> pathStream = Files.find(path, Integer.MAX_VALUE, (p, basicFileAttributes) -> {
             // if directory or no-read permission, ignore
             if(Files.isDirectory(p) || !Files.isReadable(p)) { return false; }
-            return p.getFileName().toString().equalsIgnoreCase(fileName);
+            return p.getFileName().toString().equalsIgnoreCase(filename);
         })
         ) {
             result = pathStream.collect(Collectors.toList());
         } catch (RuntimeException | IOException e) {
             System.out.println(e);
             result = new ArrayList<>();
+        }
+        return result;
+    }
+
+    private List<Path> findFileByName(final Path path, final String filename) {
+        final List<Path> result = new ArrayList<>();
+        try {
+            Files.walkFileTree(path, new HashSet<>(Arrays.asList(FileVisitOption.FOLLOW_LINKS)), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+                @Override public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+                    final String name = file.getFileName().toString().toLowerCase();
+                    if (filename.equals(name)) { result.add(file); }
+                    return FileVisitResult.CONTINUE;
+                }
+                @Override public FileVisitResult visitFileFailed(final Path file, final IOException e) throws IOException { return FileVisitResult.SKIP_SUBTREE; }
+                @Override public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException { return FileVisitResult.CONTINUE; }
+            });
+        } catch (IOException e) {
+            System.out.println(e);
+            return result;
         }
         return result;
     }

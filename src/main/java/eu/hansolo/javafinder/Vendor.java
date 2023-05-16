@@ -1,5 +1,15 @@
 package eu.hansolo.javafinder;
 
+import static eu.hansolo.javafinder.Constants.FIELD_BUILD_JDK;
+import static eu.hansolo.javafinder.Constants.FIELD_CREATED_BY;
+import static eu.hansolo.jdktools.Constants.COLON;
+import static eu.hansolo.jdktools.Constants.COMMA;
+import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_CLOSE;
+import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_OPEN;
+import static eu.hansolo.jdktools.Constants.NEW_LINE;
+import static eu.hansolo.jdktools.Constants.QUOTES;
+
+
 public enum Vendor {
     ALIBABA("Alibaba", "alibaba"),
     AMAZON("Amazon", "amazon"),

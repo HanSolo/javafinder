@@ -17,6 +17,8 @@ public class Constants {
     public static final String       FIELD_BIT                = "bit";
     public static final String       FIELD_OPERATING_SYSTEM   = "operating_system";
     public static final String       FIELD_SEARCH_PATH        = "search_path";
+    public static final String       FIELD_CREATED_BY         = "created_by";
+    public static final String       FIELD_BUILD_JDK          = "build_jdk";
     public static final String       JAVA_HOME_PROPERTY_KEY   = "java.home";
     public static final String       OS_NAME_PROPERTY_KEY     = "os.name";
     public static final String       OS_ARCH_PROPERTY_KEY     = "os.arch";
