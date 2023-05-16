@@ -25,9 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -35,9 +32,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -218,37 +212,6 @@ public class Finder {
             e.printStackTrace();
             return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE);
         }
-    }
-
-    private JdkInfo getJdkInfo(final String jarFilename) {
-        try {
-            final JarFile                        jarFile      = new JarFile(jarFilename);
-            final Manifest                       manifest     = jarFile.getManifest();
-            final Attributes                     attributes   = manifest.getMainAttributes();
-            final Optional<Entry<Object,Object>> optCreatedBy = attributes.entrySet().stream().filter(entry -> entry.getKey().toString().equalsIgnoreCase("Created-By")).findFirst();
-            final Optional<Entry<Object,Object>> optBuildJdk  = attributes.entrySet().stream().filter(entry -> entry.getKey().toString().equalsIgnoreCase("Build-Jdk")).findFirst();
-            final String                         createdBy    = optCreatedBy.isPresent() ? optCreatedBy.get().getValue().toString() : "";
-            final String                         buildJdk     = optBuildJdk.isPresent()  ? optBuildJdk.get().getValue().toString()  : "";
-            return new JdkInfo(createdBy, buildJdk);
-        } catch(IOException e) {
-            return new JdkInfo("", "");
-        }
-    }
-
-    private List<Path> findByFileName(final Path path, final String filename) {
-        List<Path> result;
-        try (Stream<Path> pathStream = Files.find(path, Integer.MAX_VALUE, (p, basicFileAttributes) -> {
-            // if directory or no-read permission, ignore
-            if(Files.isDirectory(p) || !Files.isReadable(p)) { return false; }
-            return p.getFileName().toString().equalsIgnoreCase(filename);
-        })
-        ) {
-            result = pathStream.collect(Collectors.toList());
-        } catch (RuntimeException | IOException e) {
-            System.out.println(e);
-            result = new ArrayList<>();
-        }
-        return result;
     }
 
     private List<Path> findFileByName(final Path path, final String filename) {
