@@ -82,7 +82,7 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Windows
-        run: native-image -cp classes:.\build\libs\javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:build\libs\javafinder-17.0.0-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
