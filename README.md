@@ -27,7 +27,7 @@ Shell: ```./javafinder /System/Volumes/Data/Library/Java/JavaVirtualMachines```
 
 <br>
 
-Find all JDK distributions on Windows in the path ```c:\\``` and print in csv format to the console:
+Find all JDK distributions on Windows in the path ```c:\``` and print in csv format to the console:
 
 Shell: ```javafinder csv c:\```
 
