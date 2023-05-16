@@ -112,7 +112,7 @@ public class Main {
         }
 
         // Output
-        System.out.println(msgBuilder);
+        if (!distros.isEmpty()) { System.out.println(msgBuilder); }
         System.exit(0);
     }
 

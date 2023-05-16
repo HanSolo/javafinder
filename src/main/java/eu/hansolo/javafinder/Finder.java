@@ -83,7 +83,6 @@ public class Finder {
 
         searchPaths.forEach(searchPath -> {
             final Path       path      = Paths.get(searchPath);
-            //final List<Path> javaFiles = findByFileName(path, javaFile);
             final List<Path> javaFiles = findFileByName(path, javaFile);
             javaFiles.stream().forEach(java -> checkForDistribution(java.toString(), distros));
         });
@@ -245,29 +244,35 @@ public class Finder {
             final String binFolder     = new StringBuilder(fileSeparator).append("bin").append(fileSeparator).append(".*").toString();
 
             ProcessBuilder builder  = new ProcessBuilder(commands).redirectErrorStream(true);
-            Process        process  = builder.start();
+            Process process;
+            try {
+                process = builder.start();
+            } catch (Exception e) {
+                System.out.println("Not allowed to check: " + java);
+                return;
+            }
             Streamer streamer = new Streamer(process.getInputStream(), d -> {
-                final String parentPath       = OperatingSystem.WINDOWS == operatingSystem ? java.replaceAll("bin\\\\java.exe", "") : java.replaceAll(binFolder, fileSeparator);
-                final File   releaseFile      = new File(parentPath + "release");
-                String[]     lines            = d.split("\\|");
-                String       name             = "Unknown build of OpenJDK";
-                Distribution distribution     = Distribution.NOT_FOUND;
-                String       apiString        = "";
-                String       operatingSystem  = "";
-                String       architecture     = "";
-                String       feature          = "";
-                Boolean      fxBundled        = Boolean.FALSE;
+                final String parentPath      = OperatingSystem.WINDOWS == operatingSystem ? java.replaceAll("bin\\\\java.exe", "") : java.replaceAll(binFolder, fileSeparator);
+                final File   releaseFile     = new File(parentPath + "release");
+                String[]     lines           = d.split("\\|");
+                String       name            = "Unknown build of OpenJDK";
+                Distribution distribution    = Distribution.NOT_FOUND;
+                String       apiString       = "";
+                String       operatingSystem = "";
+                String       architecture    = "";
+                String       feature         = "";
+                Boolean      fxBundled       = Boolean.FALSE;
                 //FPU          fpu              = FPU.UNKNOWN;
 
                 if (!this.javaHome.isEmpty() && !inUse.get() && parentPath.contains(javaHome)) {
                     inUse.set(true);
                 }
 
-                final File   jreLibExtFolder  = new File(new StringBuilder(parentPath).append("jre").append(fileSeparator).append("lib").append(fileSeparator).append("ext").toString());
+                final File jreLibExtFolder = new File(new StringBuilder(parentPath).append("jre").append(fileSeparator).append("lib").append(fileSeparator).append("ext").toString());
                 if (jreLibExtFolder.exists()) {
                     fxBundled = Stream.of(jreLibExtFolder.listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).stream().filter(filename -> filename.equalsIgnoreCase("jfxrt.jar")).count() > 0;
                 }
-                final File   jmodsFolder      = new File(new StringBuilder(parentPath).append("jmods").toString());
+                final File jmodsFolder = new File(new StringBuilder(parentPath).append("jmods").toString());
                 if (jmodsFolder.exists()) {
                     fxBundled = Stream.of(jmodsFolder.listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).stream().filter(filename -> filename.startsWith("javafx")).count() > 0;
                 }
@@ -276,9 +281,9 @@ public class Finder {
                 VersionNumber jdkVersion = null;
                 BuildScope    buildScope = BuildScope.BUILD_OF_OPEN_JDK;
 
-                String        line1         = lines[0];
-                String        line2         = lines[1];
-                String        withoutPrefix = line1;
+                String line1         = lines[0];
+                String line2         = lines[1];
+                String withoutPrefix = line1;
                 if (line1.startsWith("openjdk")) {
                     withoutPrefix = line1.replaceFirst("openjdk version", "");
                 } else if (line1.startsWith("java")) {
@@ -297,7 +302,7 @@ public class Finder {
                         MatchResult result = results.get(0);
                         version = VersionNumber.fromText(result.group(2));
                     }
-                } else if(line2.contains("Zing") || line2.contains("Prime")) {
+                } else if (line2.contains("Zing") || line2.contains("Prime")) {
                     name         = "ZuluPrime";
                     apiString    = "zulu_prime";
                     distribution = Distribution.ZULU_PRIME;
@@ -342,11 +347,20 @@ public class Finder {
                     }
                     if (!releaseProperties.isEmpty()) {
                         if (releaseProperties.containsKey("IMPLEMENTOR") && name.equals(Constants.UNKNOWN_BUILD_OF_OPENJDK)) {
-                            switch(releaseProperties.getProperty("IMPLEMENTOR").replaceAll("\"", "")) {
-                                case "AdoptOpenJDK"      -> { name = "Adopt OpenJDK";  apiString = "aoj";        distribution = Distribution.AOJ; }
-                                case "Alibaba"           -> { name = "Dragonwell";     apiString = "dragonwell"; distribution = Distribution.DRAGONWELL; }
-                                case "Amazon.com Inc."   -> { name = "Corretto";       apiString = "corretto";   distribution = Distribution.CORRETTO;}
-                                case "Azul Systems, Inc."-> {
+                            switch (releaseProperties.getProperty("IMPLEMENTOR").replaceAll("\"", "")) {
+                                case "AdoptOpenJDK" -> { name         = "Adopt OpenJDK";
+                                                         apiString    = "aoj";
+                                                         distribution = Distribution.AOJ;
+                                }
+                                case "Alibaba" -> { name         = "Dragonwell";
+                                                    apiString    = "dragonwell";
+                                                    distribution = Distribution.DRAGONWELL;
+                                }
+                                case "Amazon.com Inc." -> { name         = "Corretto";
+                                                            apiString    = "corretto";
+                                                            distribution = Distribution.CORRETTO;
+                                }
+                                case "Azul Systems, Inc." -> {
                                     if (releaseProperties.containsKey("IMPLEMENTOR_VERSION")) {
                                         final String implementorVersion = releaseProperties.getProperty("IMPLEMENTOR_VERSION");
                                         if (implementorVersion.startsWith("Zulu")) {
@@ -360,20 +374,59 @@ public class Finder {
                                         }
                                     }
                                 }
-                                case "mandrel"           -> { name = "Mandrel";        apiString = "mandrel";        distribution = Distribution.MANDREL; }
-                                case "Microsoft"         -> { name = "Microsoft";      apiString = "microsoft";      distribution = Distribution.MICROSOFT; }
-                                case "ojdkbuild"         -> { name = "OJDK Build";     apiString = "ojdk_build";     distribution = Distribution.OJDK_BUILD; }
-                                case "Oracle Corporation"-> { name = "Oracle OpenJDK"; apiString = "oracle_openjdk"; distribution = Distribution.ORACLE_OPEN_JDK; }
-                                case "Red Hat, Inc."     -> { name = "Red Hat";        apiString = "redhat";         distribution = Distribution.RED_HAT; }
-                                case "SAP SE"            -> { name = "SAP Machine";    apiString = "sap_machine";    distribution = Distribution.SAP_MACHINE; }
-                                case "OpenLogic"         -> { name = "OpenLogic";      apiString = "openlogic";      distribution = Distribution.OPEN_LOGIC; }
-                                case "JetBrains s.r.o."  -> { name = "JetBrains";      apiString = "jetbrains";      distribution = Distribution.JETBRAINS; }
-                                case "Eclipse Foundation"-> { name = "Temurin";        apiString = "temurin";        distribution = Distribution.TEMURIN; }
-                                case "Tencent"           -> { name = "Kona";           apiString = "kona";           distribution = Distribution.KONA; }
-                                case "Bisheng"           -> { name = "Bisheng";        apiString = "bisheng";        distribution = Distribution.BISHENG; }
-                                case "Debian"            -> { name = "Debian";         apiString = "debian";         distribution = Distribution.DEBIAN; }
-                                case "Ubuntu"            -> { name = "Ubuntu";         apiString = "ubuntu";         distribution = Distribution.UBUNTU; }
-                                case "N/A"               -> { }/* Unknown */
+                                case "mandrel" -> { name         = "Mandrel";
+                                                    apiString    = "mandrel";
+                                                    distribution = Distribution.MANDREL;
+                                }
+                                case "Microsoft" -> { name         = "Microsoft";
+                                                      apiString    = "microsoft";
+                                                      distribution = Distribution.MICROSOFT;
+                                }
+                                case "ojdkbuild" -> { name         = "OJDK Build";
+                                                      apiString    = "ojdk_build";
+                                                      distribution = Distribution.OJDK_BUILD;
+                                }
+                                case "Oracle Corporation" -> { name         = "Oracle OpenJDK";
+                                                               apiString    = "oracle_openjdk";
+                                                               distribution = Distribution.ORACLE_OPEN_JDK;
+                                }
+                                case "Red Hat, Inc." -> { name         = "Red Hat";
+                                                          apiString    = "redhat";
+                                                          distribution = Distribution.RED_HAT;
+                                }
+                                case "SAP SE" -> { name         = "SAP Machine";
+                                                   apiString    = "sap_machine";
+                                                   distribution = Distribution.SAP_MACHINE;
+                                }
+                                case "OpenLogic" -> { name         = "OpenLogic";
+                                                      apiString    = "openlogic";
+                                                      distribution = Distribution.OPEN_LOGIC;
+                                }
+                                case "JetBrains s.r.o." -> { name         = "JetBrains";
+                                                             apiString    = "jetbrains";
+                                                             distribution = Distribution.JETBRAINS;
+                                }
+                                case "Eclipse Foundation" -> { name         = "Temurin";
+                                                               apiString    = "temurin";
+                                                               distribution = Distribution.TEMURIN;
+                                }
+                                case "Tencent" -> { name         = "Kona";
+                                                    apiString    = "kona";
+                                                    distribution = Distribution.KONA;
+                                }
+                                case "Bisheng" -> { name         = "Bisheng";
+                                                    apiString    = "bisheng";
+                                                    distribution = Distribution.BISHENG;
+                                }
+                                case "Debian" -> { name         = "Debian";
+                                                   apiString    = "debian";
+                                                   distribution = Distribution.DEBIAN;
+                                }
+                                case "Ubuntu" -> { name         = "Ubuntu";
+                                                   apiString    = "ubuntu";
+                                                   distribution = Distribution.UBUNTU;
+                                }
+                                case "N/A" -> { }/* Unknown */
                             }
                         }
                         if (releaseProperties.containsKey("OS_ARCH")) {
@@ -394,24 +447,24 @@ public class Finder {
                             }
                         }
                         if (releaseProperties.containsKey("OS_NAME")) {
-                            switch(releaseProperties.getProperty("OS_NAME").toLowerCase().replaceAll("\"", "")) {
-                                case "darwin"  -> operatingSystem = "macos";
-                                case "linux"   -> operatingSystem = "linux";
+                            switch (releaseProperties.getProperty("OS_NAME").toLowerCase().replaceAll("\"", "")) {
+                                case "darwin" -> operatingSystem = "macos";
+                                case "linux" -> operatingSystem = "linux";
                                 case "windows" -> operatingSystem = "windows";
                             }
                         }
                         if (releaseProperties.containsKey("MODULES") && !fxBundled) {
                             fxBundled = (releaseProperties.getProperty("MODULES").contains("javafx"));
                         }
-                        /*
-                        if (releaseProperties.containsKey("SUN_ARCH_ABI")) {
-                            String abi = releaseProperties.get("SUN_ARCH_ABI").toString();
-                            switch (abi) {
-                                case "gnueabi"   -> fpu = FPU.SOFT_FLOAT;
-                                case "gnueabihf" -> fpu = FPU.HARD_FLOAT;
-                            }
+                    /*
+                    if (releaseProperties.containsKey("SUN_ARCH_ABI")) {
+                        String abi = releaseProperties.get("SUN_ARCH_ABI").toString();
+                        switch (abi) {
+                            case "gnueabi"   -> fpu = FPU.SOFT_FLOAT;
+                            case "gnueabihf" -> fpu = FPU.HARD_FLOAT;
                         }
-                        */
+                    }
+                    */
                     }
                 }
 
@@ -469,8 +522,8 @@ public class Finder {
                             name = "GraalVM CE";
                             String distroPreFix = "graalvm_ce";
                             if (releaseProperties.containsKey("IMPLEMENTOR")) {
-                                switch(releaseProperties.getProperty("IMPLEMENTOR").replaceAll("\"", "")) {
-                                    case "GraalVM Community"  -> {
+                                switch (releaseProperties.getProperty("IMPLEMENTOR").replaceAll("\"", "")) {
+                                    case "GraalVM Community" -> {
                                         name         = "GraalVM CE";
                                         distroPreFix = "graalvm_ce";
                                         distribution = Distribution.GRAALVM_CE;
@@ -524,12 +577,14 @@ public class Finder {
 
                 if (architecture.isEmpty()) { architecture = this.architecture.name().toLowerCase(); }
 
-                DistributionInfo distributionFound = new DistributionInfo(distribution, name, apiString, version.toString(OutputFormat.REDUCED_COMPRESSED, true, true), Integer.toString(jdkVersion.getMajorVersion().getAsInt()), operatingSystem, architecture, fxBundled, parentPath, feature, buildScope);
+                DistributionInfo distributionFound =
+                new DistributionInfo(distribution, name, apiString, version.toString(OutputFormat.REDUCED_COMPRESSED, true, true), Integer.toString(jdkVersion.getMajorVersion().getAsInt()), operatingSystem, architecture, fxBundled,
+                                     parentPath, feature, buildScope);
 
                 distros.add(distributionFound);
             });
             service.submit(streamer);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
