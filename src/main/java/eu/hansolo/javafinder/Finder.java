@@ -119,7 +119,7 @@ public class Finder {
 
     public static final OperatingSystem detectOperatingSystem() {
 
-        final String os = Constants.OS_NAME_PROPERTY.toLowerCase(); //("os.name").toLowerCase();
+        final String os = Constants.OS_NAME_PROPERTY.toLowerCase();
         if (os.indexOf("win") >= 0) {
             return OperatingSystem.WINDOWS;
         } else if (os.indexOf("mac") >= 0) {
