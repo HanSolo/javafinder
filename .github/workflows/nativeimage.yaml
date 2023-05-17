@@ -33,7 +33,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: javafinder-mac-x64
-          path: javafinder*
+          path: |
+            javafinder
+            javafinder.sha256
 
 
   build-linux:
@@ -68,7 +70,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: javafinder-linux-x64
-          path: javafinder*
+          path: |
+            javafinder
+            javafinder.sha256
 
 
   build-windows:
@@ -101,4 +105,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: javafinder-windows-x64
-          path: javafinder*
+          path: |
+            javafinder.exe
+            javafinder.exe.sha256

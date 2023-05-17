@@ -1,4 +1,4 @@
 @ECHO OFF
 
 rem ------ CHECKSUM FILE ------------------------------------------------------
-certutil -hashfile "javafinder" SHA256 > "javafinder.sha256"
+certutil -hashfile "javafinder.exe" SHA256 > "javafinder.exe.sha256"
