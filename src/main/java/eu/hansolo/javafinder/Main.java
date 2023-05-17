@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2023 by Gerrit Grunwald
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.hansolo.javafinder;
 
 import java.io.File;
@@ -22,9 +38,10 @@ import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_OPEN;
 
 
 public class Main {
-    private final Finder finder;
+    private static final String VERSION = "17.0.5";
+    private        final Finder finder;
 
-
+    // ******************** Constructors **************************************
     public Main() {
         this(null);
     }
@@ -33,6 +50,8 @@ public class Main {
         findJava(args);
     }
 
+
+    // ******************** Methods *******************************************
     private void findJava(final String[] args) {
         // System information
         final SysInfo sysInfo = Finder.getSysInfo();
@@ -41,17 +60,25 @@ public class Main {
         String     searchPath = "";
         OutputType outputType = OutputType.JSON;
         if (null == args || args.length == 0) {
-            switch(finder.detectOperatingSystem()) {
-                case WINDOWS -> searchPath = Finder.WINDOWS_JAVA_INSTALL_PATH;
-                case LINUX   -> searchPath = Finder.LINUX_JAVA_INSTALL_PATH;
-                case MACOS   -> searchPath = Finder.MACOS_JAVA_INSTALL_PATH;
-                default      -> searchPath = "";
-            }
+            searchPath = Finder.getDefaultSearchPath();
         } else {
             if (args.length == 1) {
-                if (args[0].equals("-h") || args[0].equals("-H")) {
+                final String firstArgument = args[0];
+                if (firstArgument.equals("-h") || firstArgument.equals("-H")) {
                     System.out.println("""
                                        Usage:
+                                       javafinder
+                                       -> Will in default search paths:
+                                          Windows: C:\\Program Files\\Java\\
+                                          Linux  : /usr/lib/jvm
+                                          MacOS  : /System/Volumes/Data/Library/Java/JavaVirtualMachines/
+                                       
+                                       javafinder -h
+                                       -> Shows this info
+                                       
+                                       javafinder -v
+                                       -> Shows the version
+                                       
                                        javafinder OUTPUTFORMAT PATH
                                        
                                        OUTPUTFORMAT: csv, json
@@ -69,8 +96,17 @@ public class Main {
                                        javafinder /System/Volumes/Data/Library/Java/JavaVirtualMachines
                                        """);
                     System.exit(0);
+                } else if (firstArgument.equals("-v") ||firstArgument.equals("-V")) {
+                    System.out.println("JavaFinder " + VERSION);
+                    System.exit(0);
+                } else if (firstArgument.equals("csv")) {
+                    outputType = OutputType.CSV;
+                    searchPath = Finder.getDefaultSearchPath();
+                } else if (firstArgument.equals("json")) {
+                    outputType = OutputType.JSON;
+                    searchPath = Finder.getDefaultSearchPath();
                 } else {
-                    searchPath = args[0];
+                    searchPath = firstArgument;
                 }
             } else {
                 outputType = OutputType.fromText(args[0]);
@@ -93,7 +129,7 @@ public class Main {
         StringBuilder msgBuilder;
         switch(outputType) {
             case CSV -> {
-                msgBuilder = new StringBuilder().append("Vendor,Distribution,Version,Location,Type")
+                msgBuilder = new StringBuilder().append("Vendor,Distribution,Version,Path,Type")
                                                 .append(NEW_LINE)
                                                 .append(distros.stream().map(distro -> distro.toString(OutputType.CSV)).collect(Collectors.joining()));
             }

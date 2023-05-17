@@ -22,7 +22,12 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Macos
-        run: native-image -cp classes:./build/libs/javafinder-17.0.3-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:./build/libs/javafinder-17.0.5-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+
+      - name: Grant execute permission for checksum-macos.sh
+        run: chmod +x ./checksum-macos.sh
+      - name: Create checksum
+        run: ./checksum-macos.sh
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
@@ -52,7 +57,12 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Linux
-        run: native-image -cp classes:./build/libs/javafinder-17.0.3-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:./build/libs/javafinder-17.0.5-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+
+      - name: Grant execute permission for checksum-linux.sh
+        run: chmod +x ./checksum-linux.sh
+      - name: Create checksum
+        run: ./checksum-linux.sh
 
       - name: Upload binary
         uses: actions/upload-artifact@v3
@@ -82,7 +92,11 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Windows
-        run: native-image.cmd -jar ".\build\libs\javafinder-17.0.3-fat.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
+        run: native-image.cmd -jar ".\build\libs\javafinder-17.0.5-fat.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
+
+      - name: Create checksum
+        run: .\checksum-windows.bat
+
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:

@@ -1,13 +1,20 @@
-package eu.hansolo.javafinder;
+/*
+ * Copyright (c) 2023 by Gerrit Grunwald
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import static eu.hansolo.javafinder.Constants.FIELD_BUILD_JDK;
-import static eu.hansolo.javafinder.Constants.FIELD_CREATED_BY;
-import static eu.hansolo.jdktools.Constants.COLON;
-import static eu.hansolo.jdktools.Constants.COMMA;
-import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_CLOSE;
-import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_OPEN;
-import static eu.hansolo.jdktools.Constants.NEW_LINE;
-import static eu.hansolo.jdktools.Constants.QUOTES;
+package eu.hansolo.javafinder;
 
 
 public enum Vendor {
@@ -35,12 +42,14 @@ public enum Vendor {
     private final String apiString;
 
 
+    // ******************** Constructors **************************************
     Vendor(final String uiString, final String apiString) {
         this.uiString  = uiString;
         this.apiString = apiString;
     }
 
 
+    // ******************** Methods *******************************************
     public final String getUiString() { return uiString; }
 
     public final String getApiString() { return apiString; }
