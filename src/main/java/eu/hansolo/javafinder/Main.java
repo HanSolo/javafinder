@@ -16,6 +16,8 @@
 
 package eu.hansolo.javafinder;
 
+import eu.hansolo.jdktools.OperatingSystem;
+
 import java.io.File;
 import java.util.List;
 import java.util.Set;
@@ -29,17 +31,21 @@ import static eu.hansolo.javafinder.Constants.FIELD_SEARCH_PATH;
 import static eu.hansolo.javafinder.Constants.FIELD_SYSINFO;
 import static eu.hansolo.jdktools.Constants.COLON;
 import static eu.hansolo.jdktools.Constants.COMMA;
+import static eu.hansolo.jdktools.Constants.COMMA_NEW_LINE;
 import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_CLOSE;
 import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_OPEN;
 import static eu.hansolo.jdktools.Constants.NEW_LINE;
 import static eu.hansolo.jdktools.Constants.QUOTES;
 import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_CLOSE;
 import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_OPEN;
+import static eu.hansolo.jdktools.Constants.INDENT;
+import static eu.hansolo.jdktools.Constants.INDENTED_QUOTES;
 
 
 public class Main {
-    private static final String VERSION = "17.0.5";
+    private static final String VERSION = "17.0.7";
     private        final Finder finder;
+
 
     // ******************** Constructors **************************************
     public Main() {
@@ -97,13 +103,13 @@ public class Main {
                                        """);
                     System.exit(0);
                 } else if (firstArgument.equals("-v") ||firstArgument.equals("-V")) {
-                    System.out.println("JavaFinder " + VERSION);
+                    System.out.println("JavaFinder " + Constants.CYAN + VERSION + Constants.RESET_COLOR);
                     System.exit(0);
                 } else if (firstArgument.equals("csv")) {
                     outputType = OutputType.CSV;
                     searchPath = Finder.getDefaultSearchPath();
                 } else if (firstArgument.equals("json")) {
-                    outputType = OutputType.JSON;
+                    outputType = OutputType.BEAUTIFIED_JSON;
                     searchPath = Finder.getDefaultSearchPath();
                 } else {
                     searchPath = firstArgument;
@@ -120,7 +126,7 @@ public class Main {
         // Check for valid searchPath
         final File f = new File(searchPath);
         if (!f.exists() || !f.isDirectory()) {
-            System.out.println("Given path not found");
+            System.out.println(Constants.RED + "Given path not found" + Constants.RESET_COLOR);
             System.exit(1);
         }
 
@@ -128,22 +134,62 @@ public class Main {
 
         StringBuilder msgBuilder;
         switch(outputType) {
-            case CSV -> {
+            case CSV             -> {
                 msgBuilder = new StringBuilder().append("Vendor,Distribution,Version,Path,Type")
                                                 .append(NEW_LINE)
                                                 .append(distros.stream().map(distro -> distro.toString(OutputType.CSV)).collect(Collectors.joining()));
             }
-            default  -> {
-                msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN)
-                                                .append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath).append(QUOTES).append(COMMA)
-                                                .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
-                                                .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA)
-                                                .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA)
-                                                .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES)
-                                                .append(CURLY_BRACKET_CLOSE).append(COMMA)
-                                                .append(QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON)
-                                                .append(distros.stream().map(distro -> distro.toString(OutputType.JSON)).collect(Collectors.joining(COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE)))
-                                                .append(CURLY_BRACKET_CLOSE);
+            case BEAUTIFIED_JSON -> {
+                if (OperatingSystem.WINDOWS == finder.getOperatingSystem()) {
+                    msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN).append(NEW_LINE)
+                                                    .append(INDENTED_QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath).append(QUOTES).append(COMMA_NEW_LINE)
+                                                    .append(INDENTED_QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
+                                                    .append(INDENT).append(INDENTED_QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
+                                                    .append(INDENT).append(INDENTED_QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
+                                                    .append(INDENT).append(INDENTED_QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(NEW_LINE)
+                                                    .append(INDENT).append(CURLY_BRACKET_CLOSE).append(COMMA_NEW_LINE)
+                                                    .append(INDENTED_QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE)
+                                                    .append(distros.stream().map(distro -> distro.toString(OutputType.BEAUTIFIED_JSON)).collect(Collectors.joining(COMMA_NEW_LINE)))
+                                                    .append(INDENT).append(SQUARE_BRACKET_CLOSE).append(NEW_LINE)
+                                                    .append(CURLY_BRACKET_CLOSE);
+                } else {
+                    msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN).append(NEW_LINE)
+                                                    .append(Constants.BLUE).append(INDENTED_QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(searchPath).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
+                                                    .append(Constants.BLUE).append(INDENTED_QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
+                                                    .append(INDENT).append(Constants.BLUE).append(INDENTED_QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
+                                                    .append(INDENT).append(Constants.BLUE).append(INDENTED_QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
+                                                    .append(INDENT).append(Constants.BLUE).append(INDENTED_QUOTES).append(FIELD_BIT).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(NEW_LINE)
+                                                    .append(INDENT).append(CURLY_BRACKET_CLOSE).append(COMMA_NEW_LINE)
+                                                    .append(Constants.BLUE).append(INDENTED_QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE)
+                                                    .append(distros.stream().map(distro -> distro.toString(OutputType.BEAUTIFIED_JSON)).collect(Collectors.joining(COMMA_NEW_LINE)))
+                                                    .append(NEW_LINE).append(INDENT).append(SQUARE_BRACKET_CLOSE).append(NEW_LINE)
+                                                    .append(CURLY_BRACKET_CLOSE);
+                }
+            }
+            default              -> {
+                if (OperatingSystem.WINDOWS == finder.getOperatingSystem()) {
+                    msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN)
+                                                    .append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath).append(QUOTES).append(COMMA)
+                                                    .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
+                                                    .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA)
+                                                    .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA)
+                                                    .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES)
+                                                    .append(CURLY_BRACKET_CLOSE).append(COMMA)
+                                                    .append(QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON)
+                                                    .append(distros.stream().map(distro -> distro.toString(OutputType.JSON)).collect(Collectors.joining(COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE)))
+                                                    .append(CURLY_BRACKET_CLOSE);
+                } else {
+                    msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN)
+                                                    .append(Constants.BLUE).append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(searchPath).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
+                                                    .append(Constants.BLUE).append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(CURLY_BRACKET_OPEN)
+                                                    .append(Constants.BLUE).append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
+                                                    .append(Constants.BLUE).append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
+                                                    .append(Constants.BLUE).append(QUOTES).append(FIELD_BIT).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(Constants.RESET_COLOR)
+                                                    .append(CURLY_BRACKET_CLOSE).append(COMMA)
+                                                    .append(Constants.BLUE).append(QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(Constants.RESET_COLOR).append(COLON)
+                                                    .append(distros.stream().map(distro -> distro.toString(OutputType.JSON)).collect(Collectors.joining(COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE)))
+                                                    .append(CURLY_BRACKET_CLOSE);
+                }
             }
         }
 

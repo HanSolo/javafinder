@@ -17,14 +17,15 @@
 package eu.hansolo.javafinder;
 
 public enum OutputType {
-    JSON, CSV, NOT_FOUND;
+    BEAUTIFIED_JSON, JSON, CSV, NOT_FOUND;
 
     public static final OutputType fromText(final String text) {
         if (null == text || text.isEmpty()) { return NOT_FOUND; }
         switch(text) {
-            case "json", "JSON", "Json" -> { return JSON; }
-            case "csv", "CSV"           -> { return CSV; }
-            default                     -> { return NOT_FOUND; }
+            case "json", "JSON", "Json"               -> { return JSON; }
+            case "beautified_json", "BEAUTIFIED_JSON" -> { return BEAUTIFIED_JSON; }
+            case "csv", "CSV"                         -> { return CSV; }
+            default                                   -> { return NOT_FOUND; }
         }
     }
 }

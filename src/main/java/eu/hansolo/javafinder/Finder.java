@@ -118,7 +118,6 @@ public class Finder {
     public Architecture getArchitecture() { return architecture; }
 
     public static final OperatingSystem detectOperatingSystem() {
-
         final String os = Constants.OS_NAME_PROPERTY.toLowerCase();
         if (os.indexOf("win") >= 0) {
             return OperatingSystem.WINDOWS;
@@ -281,7 +280,7 @@ public class Finder {
                 return;
             }
             Streamer streamer = new Streamer(process.getInputStream(), d -> {
-                final String parentPath      = OperatingSystem.WINDOWS == operatingSystem ? java.replaceAll("bin\\\\java.exe", "") : java.replaceAll(binFolder, fileSeparator);
+                final String parentPath      = OperatingSystem.WINDOWS == this.operatingSystem ? java.replaceAll("bin\\\\java.exe", "") : java.replaceAll(binFolder, fileSeparator);
                 final File   releaseFile     = new File(parentPath + "release");
                 String[]     lines           = d.split("\\|");
                 String       name            = "Unknown build of OpenJDK";

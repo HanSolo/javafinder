@@ -6,8 +6,8 @@ Execute the following command in the project folder
 ```./gradlew clean build```
 
 You will find two jar files in the ```build/lib``` folder:
-- ```javafinder-17.0.5.jar```
-- ```javafinder-17.0.5-fat.jar```
+- ```javafinder-17.0.7.jar```
+- ```javafinder-17.0.7-fat.jar```
 
 <br>
 
@@ -15,7 +15,7 @@ You will find two jar files in the ```build/lib``` folder:
 To build a native image, make sure you have GraalVM installed with the native-image option
 
 #### Shell
-```native-image -cp classes:build/libs/javafinder-17.0.5-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback```
+```native-image -cp classes:build/libs/javafinder-17.0.7-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback```
 
 <br>
 
@@ -34,14 +34,17 @@ Will show the version number ```javafinder -v```
 ### csv
 Will output the result in csv format ```javafinder csv /PATH```
 
-### json (default)
-Will output the result in json format ```javafinder json /PATH```
+### json
+Will output the result in json beautified format ```javafinder json /PATH```
+
+### Not specified
+If you don't specify an output format it will use json (not beautified)  ```javafinder /PATH```
 
 <br>
 
 ### Usage
 Find all JDK distributions on MacOS in the path ```/System/Volumes/Data/Library/Java/JavaVirtualMachines```
-and print in json format to the console:
+and print in non beautified json format to the console:
 
 Shell: ```./javafinder /System/Volumes/Data/Library/Java/JavaVirtualMachines```
 
@@ -56,8 +59,15 @@ Shell: ```javafinder csv c:\```
 #### Result:
 The json output also contains information about the current system
 
-Output all distributions found in json format
+Output all distributions found in <b>non beautified</b> json format
 ```./javafinder /System/Volumes/Data/Library/Java/JavaVirtualMachines```
+
+```json
+{"search_path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/","sysinfo":{"operating_system":"Mac OS","architecture":"ARM64","bit":"64 Bit"},"distributions":[{"vendor":"Gluon","name":"Gluon GraalVM","version":"22.1.0.1","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/gluon-graalvm/Contents/Home/","build_scope":"GraalVM"},{"vendor":"Azul","name":"Zulu","version":"8.0.372+7","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/zulu-8.jdk/zulu-8.jdk/Contents/Home/jre/","build_scope":"OpenJDK"},{"vendor":"Azul","name":"Zulu","version":"8.0.372+7","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/zulu-8.jdk/zulu-8.jdk/Contents/Home/","build_scope":"OpenJDK"},{"vendor":"Azul","name":"Zulu","version":"11.0.19","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/zulu-11.jdk/zulu-11.jdk/Contents/Home/","build_scope":"OpenJDK"},{"vendor":"Oracle","name":"Graal VM CE","version":"22.3.1","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/graalvm-ce-java17-22.3.1/Contents/Home/","build_scope":"GraalVM"},{"vendor":"Azul","name":"Zulu","version":"17.0.7","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/zulu-17.jdk/zulu-17.jdk/Contents/Home/","build_scope":"OpenJDK"},{"vendor":"Azul","name":"Zulu","version":"20.0.1","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/zulu-20.jdk/zulu-20.jdk/Contents/Home/","build_scope":"OpenJDK"},{"vendor":"Azul","name":"Zulu","version":"21-ea+22","path":"/System/Volumes/Data/Library/Java/JavaVirtualMachines/zulu-21.jdk/zulu-21.jdk/Contents/Home/","build_scope":"OpenJDK"}]}
+```
+
+Output all distributions found in <b>beautified</b> json format
+```./javafinder /System/Volumes/Data/Library/Java/JavaVirtualMachines json```
 
 ```json
 {
