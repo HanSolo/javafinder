@@ -6,8 +6,8 @@ Execute the following command in the project folder
 ```./gradlew clean build```
 
 You will find two jar files in the ```build/lib``` folder:
-- ```javafinder-17.0.7.jar```
-- ```javafinder-17.0.7-fat.jar```
+- ```javafinder-17.0.9.jar```
+- ```javafinder-17.0.9-fat.jar```
 
 <br>
 
@@ -15,7 +15,7 @@ You will find two jar files in the ```build/lib``` folder:
 To build a native image, make sure you have GraalVM installed with the native-image option
 
 #### Shell
-```native-image -cp classes:build/libs/javafinder-17.0.7-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback```
+```native-image -cp classes:build/libs/javafinder-17.0.9-fat.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback```
 
 <br>
 
