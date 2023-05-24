@@ -67,7 +67,7 @@ Output all distributions found in <b>non beautified</b> json format
 ```
 
 Output all distributions found in <b>beautified</b> json format
-```./javafinder /System/Volumes/Data/Library/Java/JavaVirtualMachines json```
+```./javafinder json /System/Volumes/Data/Library/Java/JavaVirtualMachines```
 
 ```json
 {
