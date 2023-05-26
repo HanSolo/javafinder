@@ -3,7 +3,6 @@ import java.text.SimpleDateFormat
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'com.google.osdetector'           version '1.7.3'
     id 'net.nemerosa.versioning'         version '3.0.0'
 }
@@ -60,16 +59,12 @@ jar {
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description'    : 'JavaFinder is a little tool that helps you to find all installed Java versions in a given path',
                 'Bundle-SymbolicName'   : 'eu.hansolo.javafinder',
-                //'Class-Path'            : '${project.name}-${project.version}-fat.jar',
+                //'Class-Path'            : '${project.name}-${project.version}.jar',
                 //'Class-Path'            : configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
                 //'Class-Path'            : configurations.runtimeClasspath.collect { it.getName() }.join(' '),
                 'Main-Class'            : application.mainClass.get()
         )
     }
-}
-
-shadowJar {
-    archiveClassifier.set('fat');
 }
 
 sourceSets {
