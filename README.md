@@ -1,5 +1,45 @@
 ## JavaFinder
 
+JavaFinder is a little command line tool to find (hopefully) all Java installations in a given path (incl. subfolders).
+This can be useful if you need to figure out what kind of distributions you have installed on your machine.
+It should find builds of OpenJDK and GraalVM including the following distributions:
+- AdoptOpenJDK
+- AdoptOpenJDK J9
+- Bi Sheng
+- Corretto
+- Debian
+- Dragonwell
+- Gluon GraalVM
+- Graalvm CE
+- Graalvm EE
+- JetBrains
+- Kona
+- Liberica
+- Liberica Native
+- Mandrel
+- Microsoft
+- OJDK Build
+- Open Logic
+- Oracle
+- Oracle OpenJDK
+- RedHat
+- SAP Machine
+- Semeru
+- Semeru Certified
+- Temurin
+- Trava
+- Ubuntu
+- Zulu
+- Zulu Prime
+
+### Download the binaries
+You can download the latest binaries [here](https://github.com/HanSolo/javafinder/releases).
+
+
+### Requirements to build the binary yourself
+- A build of OpenJDK 17 (org greater than 17)
+- GraalVM CE (to build the native image)
+
 ### Build jar file
 Execute the following command in the project folder
 
