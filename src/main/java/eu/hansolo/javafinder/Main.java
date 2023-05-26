@@ -43,7 +43,7 @@ import static eu.hansolo.jdktools.Constants.INDENTED_QUOTES;
 
 
 public class Main {
-    private static final String VERSION = "17.0.11";
+    private static final String VERSION = "17.0.13";
     private        final Finder finder;
 
 
@@ -154,11 +154,11 @@ public class Main {
                                                     .append(CURLY_BRACKET_CLOSE);
                 } else {
                     msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN).append(NEW_LINE)
-                                                    .append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(searchPath).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
+                                                    .append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(searchPath).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
                                                     .append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
-                                                    .append(INDENT).append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                                                    .append(INDENT).append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                                                    .append(INDENT).append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_BIT).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(NEW_LINE)
+                                                    .append(INDENT).append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
+                                                    .append(INDENT).append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
+                                                    .append(INDENT).append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_BIT).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(NEW_LINE)
                                                     .append(INDENT).append(CURLY_BRACKET_CLOSE).append(COMMA_NEW_LINE)
                                                     .append(Constants.BRIGHT_BLUE).append(INDENTED_QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE)
                                                     .append(distros.stream().map(distro -> distro.toString(OutputType.BEAUTIFIED_JSON)).collect(Collectors.joining(COMMA_NEW_LINE)))
@@ -180,11 +180,11 @@ public class Main {
                                                     .append(CURLY_BRACKET_CLOSE);
                 } else {
                     msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN)
-                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(searchPath).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
+                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(searchPath).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
                                                     .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(CURLY_BRACKET_OPEN)
-                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
-                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
-                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_BIT).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.MAGENTA).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(Constants.RESET_COLOR)
+                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
+                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
+                                                    .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_BIT).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(Constants.RESET_COLOR)
                                                     .append(CURLY_BRACKET_CLOSE).append(COMMA)
                                                     .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(Constants.RESET_COLOR).append(COLON)
                                                     .append(distros.stream().map(distro -> distro.toString(OutputType.JSON)).collect(Collectors.joining(COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE)))
