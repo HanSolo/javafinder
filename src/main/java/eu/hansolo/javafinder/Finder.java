@@ -37,10 +37,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -56,29 +61,30 @@ import java.util.stream.Stream;
 
 
 public class Finder {
-    public static final  String          MACOS_JAVA_INSTALL_PATH   = "/System/Volumes/Data/Library/Java/JavaVirtualMachines/";
-    public static final  String          WINDOWS_JAVA_INSTALL_PATH = "C:\\Program Files\\Java\\";
-    public static final  String          LINUX_JAVA_INSTALL_PATH   = "/usr/lib/jvm";
-    private static final Pattern         GRAALVM_VERSION_PATTERN   = Pattern.compile("(.*graalvm\\s)(.*)(\\s\\(.*)");
-    private static final Matcher         GRAALVM_VERSION_MATCHER   = GRAALVM_VERSION_PATTERN.matcher("");
-    private static final Pattern         ZULU_BUILD_PATTERN        = Pattern.compile("\\((build\\s)(.*)\\)");
-    private static final Matcher         ZULU_BUILD_MATCHER        = ZULU_BUILD_PATTERN.matcher("");
-    private static final String[]        MAC_JAVA_HOME_CMDS        = { "/bin/sh", "-c", "echo $JAVA_HOME" };
-    private static final String[]        LINUX_JAVA_HOME_CMDS      = { "/usr/bin/sh", "-c", "echo $JAVA_HOME" };
-    private static final String[]        WIN_JAVA_HOME_CMDS        = { "cmd.exe", "/c", "echo %JAVA_HOME%" };
-    private static final String[]        DETECT_ALPINE_CMDS        = { "/bin/sh", "-c", "cat /etc/os-release | grep 'NAME=' | grep -ic 'Alpine'" };
-    private static final String[]        UX_DETECT_ARCH_CMDS       = { "/bin/sh", "-c", "uname -m" };
-    private static final String[]        MAC_DETECT_ROSETTA2_CMDS  = { "/bin/sh", "-c", "sysctl -in sysctl.proc_translated" };
-    private static final String[]        WIN_DETECT_ARCH_CMDS      = { "cmd.exe", "/c", "SET Processor" };
-    private static final Pattern         ARCHITECTURE_PATTERN      = Pattern.compile("(PROCESSOR_ARCHITECTURE)=([a-zA-Z0-9_\\-]+)");
-    private static final Matcher         ARCHITECTURE_MATCHER      = ARCHITECTURE_PATTERN.matcher("");
-    private              ExecutorService service                   = Executors.newSingleThreadExecutor();
-    private              Properties      releaseProperties         = new Properties();
-    private              OperatingSystem operatingSystem           = detectOperatingSystem();
-    private              Architecture    architecture              = detectArchitecture();
-    private              String          javaFile                  = OperatingSystem.WINDOWS == operatingSystem ? "java.exe" : "java";
-    private              String          javaHome                  = "";
-    private              boolean         isAlpine                  = false;
+    public static final  String            MACOS_JAVA_INSTALL_PATH   = "/System/Volumes/Data/Library/Java/JavaVirtualMachines/";
+    public static final  String            WINDOWS_JAVA_INSTALL_PATH = "C:\\Program Files\\Java\\";
+    public static final  String            LINUX_JAVA_INSTALL_PATH   = "/usr/lib/jvm";
+    private static final Pattern           GRAALVM_VERSION_PATTERN   = Pattern.compile("(.*graalvm\\s)(.*)(\\s\\(.*)");
+    private static final Matcher           GRAALVM_VERSION_MATCHER   = GRAALVM_VERSION_PATTERN.matcher("");
+    private static final Pattern           ZULU_BUILD_PATTERN        = Pattern.compile("\\((build\\s)(.*)\\)");
+    private static final Matcher           ZULU_BUILD_MATCHER        = ZULU_BUILD_PATTERN.matcher("");
+    private static final String[]          MAC_JAVA_HOME_CMDS        = { "/bin/sh", "-c", "echo $JAVA_HOME" };
+    private static final String[]          LINUX_JAVA_HOME_CMDS      = { "/usr/bin/sh", "-c", "echo $JAVA_HOME" };
+    private static final String[]          WIN_JAVA_HOME_CMDS        = { "cmd.exe", "/c", "echo %JAVA_HOME%" };
+    private static final String[]          DETECT_ALPINE_CMDS        = { "/bin/sh", "-c", "cat /etc/os-release | grep 'NAME=' | grep -ic 'Alpine'" };
+    private static final String[]          UX_DETECT_ARCH_CMDS       = { "/bin/sh", "-c", "uname -m" };
+    private static final String[]          MAC_DETECT_ROSETTA2_CMDS  = { "/bin/sh", "-c", "sysctl -in sysctl.proc_translated" };
+    private static final String[]          WIN_DETECT_ARCH_CMDS      = { "cmd.exe", "/c", "SET Processor" };
+    private static final Pattern           ARCHITECTURE_PATTERN      = Pattern.compile("(PROCESSOR_ARCHITECTURE)=([a-zA-Z0-9_\\-]+)");
+    private static final Matcher           ARCHITECTURE_MATCHER      = ARCHITECTURE_PATTERN.matcher("");
+    private final        List<ProcessInfo> usedDistros;
+    private              ExecutorService   service                   = Executors.newSingleThreadExecutor();
+    private              Properties        releaseProperties         = new Properties();
+    private              OperatingSystem   operatingSystem           = detectOperatingSystem();
+    private              Architecture      architecture              = detectArchitecture();
+    private              String            javaFile                  = OperatingSystem.WINDOWS == operatingSystem ? "java.exe" : "java";
+    private              String            javaHome                  = "";
+    private              boolean           isAlpine                  = false;
 
 
     // ******************** Constructors **************************************
@@ -87,6 +93,7 @@ public class Finder {
         if (null == this.javaHome || this.javaHome.isEmpty()) {
             this.javaHome = System.getProperty(Constants.JAVA_HOME_PROPERTY_KEY);
         }
+        this.usedDistros = getUsedDistros();
     }
 
 
@@ -239,6 +246,18 @@ public class Finder {
         }
     }
 
+    public List<ProcessInfo> getUsedDistros() {
+        final long              currentPid  = ProcessHandle.current().pid();
+        final List<ProcessInfo> usedDistros = ProcessHandle.allProcesses()
+                                                           .filter(process -> process.pid() != currentPid)
+                                                           .filter(process -> process.info().command().isPresent())
+                                                           .filter(process -> process.info().command().get().endsWith(this.javaFile))
+                                                           .filter(process -> !Files.isSymbolicLink(Path.of(process.info().command().get())))
+                                                           .map(process -> new ProcessInfo(process.pid(), process.info().command().get(), process.info().commandLine().isPresent() ? process.info().commandLine().get() : "unknown"))
+                                                           .collect(Collectors.toList());
+        return usedDistros;
+    }
+
     private List<Path> findFileByName(final Path path, final String filename) {
         final List<Path> result = new ArrayList<>();
         try {
@@ -261,7 +280,9 @@ public class Finder {
     }
 
     private void checkForDistribution(final String java, final Set<DistributionInfo> distros) {
-        AtomicBoolean inUse = new AtomicBoolean(false);
+        Instant       now    = Instant.now();
+        AtomicBoolean inUse  = new AtomicBoolean(false);
+        List<String>  usedBy = new ArrayList<>();
 
         try {
             List<String> commands = new ArrayList<>();
@@ -605,9 +626,16 @@ public class Finder {
 
                 if (architecture.isEmpty()) { architecture = this.architecture.name().toLowerCase(); }
 
-                DistributionInfo distributionFound =
-                new DistributionInfo(distribution, name, apiString, version.toString(OutputFormat.REDUCED_COMPRESSED, true, true), Integer.toString(jdkVersion.getMajorVersion().getAsInt()), operatingSystem, architecture, fxBundled,
-                                     parentPath, feature, buildScope);
+                // Check if found distro is in use
+                for (ProcessInfo processInfo : usedDistros) {
+                    if (java.contains(processInfo.cmd())) {
+                        inUse.set(true);
+                        usedBy.add(processInfo.cmdLine());
+                        break;
+                    }
+                }
+
+                DistributionInfo distributionFound = new DistributionInfo(now, distribution, name, apiString, version.toString(OutputFormat.REDUCED_COMPRESSED, true, true), Integer.toString(jdkVersion.getMajorVersion().getAsInt()), operatingSystem, architecture, fxBundled, parentPath, feature, buildScope, inUse.get(), usedBy);
 
                 distros.add(distributionFound);
             });
