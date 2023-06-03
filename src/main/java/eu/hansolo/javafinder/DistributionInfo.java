@@ -29,7 +29,6 @@ import static eu.hansolo.javafinder.Constants.FIELD_TIMESTAMP;
 import static eu.hansolo.javafinder.Constants.FIELD_USED_BY;
 import static eu.hansolo.javafinder.Constants.FIELD_VENDOR;
 import static eu.hansolo.javafinder.Constants.FIELD_VERSION;
-import static eu.hansolo.javafinder.Constants.RESET_COLOR;
 import static eu.hansolo.javafinder.OutputType.JSON;
 import static eu.hansolo.jdktools.Constants.COLON;
 import static eu.hansolo.jdktools.Constants.COMMA;
@@ -74,81 +73,42 @@ public record DistributionInfo(Instant timestamp, Distribution distribution, Str
                                  .toString();
             }
             case BEAUTIFIED_JSON -> {
-                if ("windows" == operatingSystem) {
-                    msgBuilder.append(INDENT).append(INDENT).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_VENDOR).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getVendor().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_NAME).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(COLON).append(QUOTES).append(version()).append(QUOTES).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp().getEpochSecond()).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location()).append(QUOTES).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(COLON).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(QUOTES).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(COLON).append(inUse()).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE);
+                msgBuilder.append(INDENT).append(INDENT).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_VENDOR).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getVendor().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_NAME).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(COLON).append(QUOTES).append(version()).append(QUOTES).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp().getEpochSecond()).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location()).append(QUOTES).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(COLON).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(QUOTES).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(COLON).append(inUse()).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE);
 
-                    usedBy().forEach(cmdLine -> {
-                        msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(cmdLine).append(QUOTES).append(COMMA_NEW_LINE);
-                    });
-                    if (!usedBy().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 2); }
+                usedBy().forEach(cmdLine -> {
+                    msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(cmdLine).append(QUOTES).append(COMMA_NEW_LINE);
+                });
+                if (!usedBy().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 2); }
 
-                    msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(SQUARE_BRACKET_CLOSE).append(NEW_LINE)
-                              .append(INDENT).append(INDENT).append(CURLY_BRACKET_CLOSE);
-                    return msgBuilder.toString();
-                } else {
-                    msgBuilder.append(INDENT).append(INDENT).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_VENDOR).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(distribution().getVendor().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_NAME).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(version()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(timestamp().getEpochSecond()).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(location()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(Constants.RESET_COLOR).append(QUOTES).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(inUse()).append(Constants.RESET_COLOR).append(COMMA_NEW_LINE)
-                              .append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.RESET_COLOR).append(SQUARE_BRACKET_OPEN).append(NEW_LINE);
-
-                    usedBy().forEach(cmdLine -> {
-                        msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(INDENT).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(cmdLine).append(QUOTES).append(RESET_COLOR).append(COMMA_NEW_LINE);
-                    });
-                    if (!usedBy().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 2); }
-
-                    msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(SQUARE_BRACKET_CLOSE).append(NEW_LINE)
-                              .append(INDENT).append(INDENT).append(CURLY_BRACKET_CLOSE);
-                    return msgBuilder.toString();
-                }
+                msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(SQUARE_BRACKET_CLOSE).append(NEW_LINE)
+                          .append(INDENT).append(INDENT).append(CURLY_BRACKET_CLOSE);
+                return msgBuilder.toString();
             }
             default  -> {
-                if ("windows" == operatingSystem) {
-                    msgBuilder.append(CURLY_BRACKET_OPEN)
-                              .append(QUOTES).append(FIELD_VENDOR).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getVendor().getUiString()).append(QUOTES).append(COMMA)
-                              .append(QUOTES).append(FIELD_NAME).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(COMMA)
-                              .append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(COLON).append(QUOTES).append(version()).append(QUOTES).append(COMMA)
-                              .append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp().getEpochSecond()).append(COMMA)
-                              .append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location()).append(QUOTES).append(COMMA)
-                              .append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(COLON).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(QUOTES).append(COMMA)
-                              .append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(COLON).append(inUse()).append(COMMA)
-                              .append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN);
-                    usedBy().forEach(cmdLine -> {
-                        msgBuilder.append(QUOTES).append(cmdLine).append(QUOTES).append(COMMA);
-                    });
-                              if (!usedBy().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 1); }
-                    msgBuilder.append(SQUARE_BRACKET_CLOSE)
-                              .append(CURLY_BRACKET_CLOSE);
-                    return msgBuilder.toString();
-                } else {
-                    msgBuilder.append(CURLY_BRACKET_OPEN)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_VENDOR).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(distribution().getVendor().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_NAME).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(version()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(timestamp().getEpochSecond()).append(Constants.RESET_COLOR).append(COMMA)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_PATH).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(location()).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(Constants.RESET_COLOR).append(QUOTES).append(COMMA)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(Constants.BRIGHT_MAGENTA).append(inUse()).append(Constants.RESET_COLOR).append(COMMA)
-                              .append(Constants.BRIGHT_BLUE).append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(Constants.RESET_COLOR).append(COLON).append(SQUARE_BRACKET_OPEN);
-                    usedBy().forEach(cmdLine -> {
-                        msgBuilder.append(Constants.BRIGHT_MAGENTA).append(QUOTES).append(cmdLine).append(QUOTES).append(Constants.RESET_COLOR).append(COMMA);
-                    });
-                    msgBuilder.append(SQUARE_BRACKET_CLOSE)
-                              .append(CURLY_BRACKET_CLOSE);
-                    return msgBuilder.toString();
-                }
+                msgBuilder.append(CURLY_BRACKET_OPEN)
+                          .append(QUOTES).append(FIELD_VENDOR).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getVendor().getUiString()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_NAME).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(COLON).append(QUOTES).append(version()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp().getEpochSecond()).append(COMMA)
+                          .append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(COLON).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(COLON).append(inUse()).append(COMMA)
+                          .append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN);
+                usedBy().forEach(cmdLine -> {
+                    msgBuilder.append(QUOTES).append(cmdLine).append(QUOTES).append(COMMA);
+                });
+                          if (!usedBy().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 1); }
+                msgBuilder.append(SQUARE_BRACKET_CLOSE)
+                          .append(CURLY_BRACKET_CLOSE);
+                return msgBuilder.toString();
             }
         }
     }
