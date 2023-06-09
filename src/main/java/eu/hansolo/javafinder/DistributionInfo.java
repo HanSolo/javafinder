@@ -78,13 +78,13 @@ public record DistributionInfo(Instant timestamp, Distribution distribution, Str
                           .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_NAME).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
                           .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(COLON).append(QUOTES).append(version()).append(QUOTES).append(COMMA_NEW_LINE)
                           .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp().getEpochSecond()).append(COMMA_NEW_LINE)
-                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location()).append(QUOTES).append(COMMA_NEW_LINE)
+                          .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location().replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA_NEW_LINE)
                           .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(COLON).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(QUOTES).append(COMMA_NEW_LINE)
                           .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(COLON).append(inUse()).append(COMMA_NEW_LINE)
                           .append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE);
 
                 usedBy().forEach(cmdLine -> {
-                    msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(cmdLine).append(QUOTES).append(COMMA_NEW_LINE);
+                    msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(cmdLine.replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA_NEW_LINE);
                 });
                 if (!usedBy().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 2); }
 
@@ -98,12 +98,12 @@ public record DistributionInfo(Instant timestamp, Distribution distribution, Str
                           .append(QUOTES).append(FIELD_NAME).append(QUOTES).append(COLON).append(QUOTES).append(distribution().getUiString()).append(QUOTES).append(COMMA)
                           .append(QUOTES).append(FIELD_VERSION).append(QUOTES).append(COLON).append(QUOTES).append(version()).append(QUOTES).append(COMMA)
                           .append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp().getEpochSecond()).append(COMMA)
-                          .append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_PATH).append(QUOTES).append(COLON).append(QUOTES).append(location().replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA)
                           .append(QUOTES).append(FIELD_BUILD_SCOPE).append(QUOTES).append(COLON).append(QUOTES).append(buildScope().getUiString().substring(buildScope.getUiString().lastIndexOf(" ") + 1)).append(QUOTES).append(COMMA)
                           .append(QUOTES).append(FIELD_IN_USE).append(QUOTES).append(COLON).append(inUse()).append(COMMA)
                           .append(QUOTES).append(FIELD_USED_BY).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN);
                 usedBy().forEach(cmdLine -> {
-                    msgBuilder.append(QUOTES).append(cmdLine).append(QUOTES).append(COMMA);
+                    msgBuilder.append(QUOTES).append(cmdLine.replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA);
                 });
                           if (!usedBy().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 1); }
                 msgBuilder.append(SQUARE_BRACKET_CLOSE)

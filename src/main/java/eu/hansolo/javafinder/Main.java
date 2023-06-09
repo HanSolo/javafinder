@@ -43,7 +43,7 @@ import static eu.hansolo.jdktools.Constants.INDENTED_QUOTES;
 
 
 public class Main {
-    private static final String VERSION = "17.0.19";
+    private static final String VERSION = "17.0.21";
     private        final Finder finder;
 
 
@@ -68,7 +68,7 @@ public class Main {
         String     searchPath = "";
         OutputType outputType = OutputType.JSON;
         if (null == args || args.length == 0) {
-            searchPath = Finder.getDefaultSearchPath();
+            searchPath = Finder.getDefaultSearchPath().replaceAll("\\\\", "\\\\\\\\");
         } else {
             if (args.length == 1) {
                 final String firstArgument = args[0];
