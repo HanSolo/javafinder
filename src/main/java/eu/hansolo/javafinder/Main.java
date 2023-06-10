@@ -68,7 +68,7 @@ public class Main {
         String     searchPath = "";
         OutputType outputType = OutputType.JSON;
         if (null == args || args.length == 0) {
-            searchPath = Finder.getDefaultSearchPath().replaceAll("\\\\", "\\\\\\\\");
+            searchPath = Finder.getDefaultSearchPath();
         } else {
             if (args.length == 1) {
                 final String firstArgument = args[0];
@@ -143,7 +143,7 @@ public class Main {
             case BEAUTIFIED_JSON ->
                 msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN).append(NEW_LINE)
                                                 .append(INDENTED_QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp).append(COMMA_NEW_LINE)
-                                                .append(INDENTED_QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath).append(QUOTES).append(COMMA_NEW_LINE)
+                                                .append(INDENTED_QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath.replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA_NEW_LINE)
                                                 .append(INDENTED_QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
                                                 .append(INDENT).append(INDENTED_QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
                                                 .append(INDENT).append(INDENTED_QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
@@ -156,7 +156,7 @@ public class Main {
             default ->
                 msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN)
                                                 .append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp).append(COMMA)
-                                                .append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath).append(QUOTES).append(COMMA)
+                                                .append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath.replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA)
                                                 .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
                                                 .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA)
                                                 .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA)

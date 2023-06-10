@@ -26,7 +26,5 @@ replay_pid*
 /.idea
 /build
 
-javafinder
-javafinder.build_artifacts.txt
 .DS_Store
 
