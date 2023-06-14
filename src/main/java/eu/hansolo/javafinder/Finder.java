@@ -337,10 +337,30 @@ public class Finder {
                     withoutPrefix = line1.replaceFirst("openjdk version", "");
                 } else if (line1.startsWith("java")) {
                     withoutPrefix = line1.replaceFirst("java version", "");
-                    name          = "Oracle";
-                    apiString     = "oracle";
-                    distribution  = Distribution.ORACLE;
+                    // Find new GraalVM build (former enterprise edition)
+                    if (line2.contains("GraalVM")) {
+                        name         = "GraalVM";
+                        apiString    = "graalvm";
+                        buildScope   = BuildScope.BUILD_OF_GRAALVM;
+                        distribution = Distribution.GRAALVM;
+                    } else {
+                        name       = "Oracle";
+                        apiString  = "oracle";
+                    }
                 }
+
+                // Find new GraalVM community builds
+                if (!apiString.equals("graalvm") && line2.contains("jvmci")) {
+                    VersionNumber newGraalVMBuild = VersionNumber.fromText("23.0-b12");
+                    VersionNumber graalvmBuildFound = VersionNumber.fromText(line2.substring(line2.indexOf("jvmci"), line2.length() - 1).replace("jvmci-", ""));
+                    if (graalvmBuildFound.compareTo(newGraalVMBuild) >= 0) {
+                        name         = "GraalVM Community";
+                        apiString    = "graalvm_community";
+                        buildScope   = BuildScope.BUILD_OF_GRAALVM;
+                        distribution = Distribution.GRAALVM_COMMUNITY;
+                    }
+                }
+
                 if (line2.contains("Zulu")) {
                     name         = "Zulu";
                     apiString    = "zulu";
@@ -567,7 +587,7 @@ public class Finder {
 
                         }
                     } else {
-                        if (line3.contains("graalvm")) {
+                        if (line3.contains("graalvm") && !apiString.equals("graalvm_community") && !apiString.equals("graalvm")) {
                             name = "GraalVM CE";
                             String distroPreFix = "graalvm_ce";
                             if (releaseProperties.containsKey("IMPLEMENTOR")) {
