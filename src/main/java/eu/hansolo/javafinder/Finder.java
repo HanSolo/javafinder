@@ -398,6 +398,10 @@ public class Finder {
                     name         = "Bishenq";
                     apiString    = "bisheng";
                     distribution = Distribution.BISHENG;
+                } else if (line2.startsWith("Java(TM) SE")) {
+                    name         = "Oracle";
+                    apiString    = "oracle";
+                    distribution = Distribution.ORACLE;
                 }
 
                 if (null == version) {
@@ -496,6 +500,7 @@ public class Finder {
                                                    distribution = Distribution.UBUNTU;
                                 }
                                 case "N/A" -> { }/* Unknown */
+
                             }
                         }
                         if (releaseProperties.containsKey("OS_ARCH")) {
