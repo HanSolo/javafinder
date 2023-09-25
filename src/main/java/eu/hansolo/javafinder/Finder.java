@@ -503,6 +503,15 @@ public class Finder {
 
                             }
                         }
+                        if (releaseProperties.containsKey("BUILD_TYPE")) {
+                            switch (releaseProperties.getProperty("BUILD_TYPE").replaceAll("\"", "")) {
+                                case "commercial" -> {
+                                    name         = "Oracle";
+                                    apiString    = "oracle";
+                                    distribution = Distribution.ORACLE;
+                                }
+                            }
+                        }
                         if (releaseProperties.containsKey("OS_ARCH")) {
                             architecture = releaseProperties.getProperty("OS_ARCH").toLowerCase().replaceAll("\"", "");
                         }
