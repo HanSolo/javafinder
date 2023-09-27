@@ -96,7 +96,7 @@ jobs:
           components: 'native-image'
 
       - name: Build native-image on Windows
-        run: native-image.cmd -jar ".\build\libs\javafinder-17.0.29.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
+        run: native-image.cmd -jar ".\build\libs\javafinder-17.0.31.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
 
       - name: Create checksum
         run: .\checksum-windows.bat
