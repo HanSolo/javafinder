@@ -30,6 +30,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -75,6 +77,8 @@ public class Finder {
     private static final String[]          UX_DETECT_ARCH_CMDS       = { "/bin/sh", "-c", "uname -m" };
     private static final String[]          MAC_DETECT_ROSETTA2_CMDS  = { "/bin/sh", "-c", "sysctl -in sysctl.proc_translated" };
     private static final String[]          WIN_DETECT_ARCH_CMDS      = { "cmd.exe", "/c", "SET Processor" };
+    private static final String[]          UX_DETECT_HOSTNAME_CMDS   = { "/bin/sh", "-c", "hostname" };
+    private static final String[]          WIN_DETECT_HOSTNAME_CMDS  = { "cmd.exe", "/c", "hostname.exe" };
     private static final Pattern           ARCHITECTURE_PATTERN      = Pattern.compile("(PROCESSOR_ARCHITECTURE)=([a-zA-Z0-9_\\-]+)");
     private static final Matcher           ARCHITECTURE_MATCHER      = ARCHITECTURE_PATTERN.matcher("");
     private final        List<ProcessInfo> usedDistros;
@@ -193,6 +197,7 @@ public class Finder {
     public static final SysInfo getSysInfo() {
         final OperatingSystem operatingSystem = detectOperatingSystem();
         try {
+            final String         hostname       = getHostname();
             final ProcessBuilder processBuilder = OperatingSystem.WINDOWS == operatingSystem ? new ProcessBuilder(WIN_DETECT_ARCH_CMDS) : new ProcessBuilder(UX_DETECT_ARCH_CMDS);
             final Process        process        = processBuilder.start();
             final String         result         = new BufferedReader(new InputStreamReader(process.getInputStream())).lines().collect(Collectors.joining("\n"));
@@ -203,9 +208,9 @@ public class Finder {
                     final int               noOfResults = results.size();
                     if (noOfResults > 0) {
                         final MatchResult   res = results.get(0);
-                        return new SysInfo(operatingSystem, Architecture.fromText(res.group(2)), OperatingMode.NATIVE);
+                        return new SysInfo(operatingSystem, Architecture.fromText(res.group(2)), OperatingMode.NATIVE, hostname);
                     } else {
-                        return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NOT_FOUND);
+                        return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NOT_FOUND, hostname);
                     }
                 }
                 case MACOS -> {
@@ -213,28 +218,51 @@ public class Finder {
                     final ProcessBuilder processBuilder1 = new ProcessBuilder(MAC_DETECT_ROSETTA2_CMDS);
                     final Process        process1        = processBuilder1.start();
                     final String         result1         = new BufferedReader(new InputStreamReader(process1.getInputStream())).lines().collect(Collectors.joining("\n"));
-                    return new SysInfo(operatingSystem, architecture, result1.equals("1") ? OperatingMode.EMULATED : OperatingMode.NATIVE);
+                    return new SysInfo(operatingSystem, architecture, result1.equals("1") ? OperatingMode.EMULATED : OperatingMode.NATIVE, hostname);
                 }
                 case LINUX -> {
-                    return new SysInfo(operatingSystem, Architecture.fromText(result), OperatingMode.NATIVE);
+                    return new SysInfo(operatingSystem, Architecture.fromText(result), OperatingMode.NATIVE, hostname);
                 }
             }
 
             // If not found yet try via system property
             final String arch = Constants.OS_ARCH_PROPERTY;
-            if (arch.contains("sparc"))                           { return new SysInfo(operatingSystem, Architecture.SPARC, OperatingMode.NATIVE); }
-            if (arch.contains("amd64") || arch.contains("86_64")) { return new SysInfo(operatingSystem, Architecture.AMD64, OperatingMode.NATIVE); }
-            if (arch.contains("86"))                              { return new SysInfo(operatingSystem, Architecture.X86, OperatingMode.NATIVE); }
-            if (arch.contains("s390x"))                           { return new SysInfo(operatingSystem, Architecture.S390X, OperatingMode.NATIVE); }
-            if (arch.contains("ppc64"))                           { return new SysInfo(operatingSystem, Architecture.PPC64, OperatingMode.NATIVE); }
-            if (arch.contains("arm") && arch.contains("64"))      { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE); }
-            if (arch.contains("arm"))                             { return new SysInfo(operatingSystem, Architecture.ARM, OperatingMode.NATIVE); }
-            if (arch.contains("aarch64"))                         { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE); }
-            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE);
+            if (arch.contains("sparc"))                           { return new SysInfo(operatingSystem, Architecture.SPARC, OperatingMode.NATIVE, hostname); }
+            if (arch.contains("amd64") || arch.contains("86_64")) { return new SysInfo(operatingSystem, Architecture.AMD64, OperatingMode.NATIVE, hostname); }
+            if (arch.contains("86"))                              { return new SysInfo(operatingSystem, Architecture.X86, OperatingMode.NATIVE, hostname); }
+            if (arch.contains("s390x"))                           { return new SysInfo(operatingSystem, Architecture.S390X, OperatingMode.NATIVE, hostname); }
+            if (arch.contains("ppc64"))                           { return new SysInfo(operatingSystem, Architecture.PPC64, OperatingMode.NATIVE, hostname); }
+            if (arch.contains("arm") && arch.contains("64"))      { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE, hostname); }
+            if (arch.contains("arm"))                             { return new SysInfo(operatingSystem, Architecture.ARM, OperatingMode.NATIVE, hostname); }
+            if (arch.contains("aarch64"))                         { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE, hostname); }
+            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE, hostname);
         } catch (IOException e) {
             e.printStackTrace();
-            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE);
+            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE, "-");
         }
+    }
+
+    public static final String getHostname() {
+        final OperatingSystem operatingSystem = detectOperatingSystem();
+        InetAddress ip;
+        String      hostname;
+        try {
+            ip       = InetAddress.getLocalHost();
+            hostname = ip.getHostName();
+        } catch (UnknownHostException e) {
+            hostname = System.getenv("HOSTNAME");
+        }
+        if (null == hostname || hostname.isEmpty()) {
+            try {
+                final ProcessBuilder processBuilder = OperatingSystem.WINDOWS == operatingSystem ? new ProcessBuilder(WIN_DETECT_HOSTNAME_CMDS) : new ProcessBuilder(UX_DETECT_HOSTNAME_CMDS);
+                final Process        process        = processBuilder.start();
+                final String         result         = new BufferedReader(new InputStreamReader(process.getInputStream())).lines().collect(Collectors.joining("\n"));
+                hostname = result;
+            } catch (IOException e) {
+                hostname = "-";
+            }
+        }
+        return hostname;
     }
 
     public static final String getDefaultSearchPath() {

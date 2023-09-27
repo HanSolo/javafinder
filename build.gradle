@@ -26,7 +26,7 @@ ext {
 }
 
 dependencies {
-    implementation 'eu.hansolo:jdktools:17.0.33'
+    implementation 'eu.hansolo:jdktools:17.0.39'
     implementation 'com.google.gradle:osdetector-gradle-plugin:1.7.3'
 }
 

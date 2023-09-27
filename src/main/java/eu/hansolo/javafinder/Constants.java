@@ -35,6 +35,7 @@ public class Constants {
     public static final String       FIELD_ARCHITECTURE       = "architecture";
     public static final String       FIELD_BIT                = "bit";
     public static final String       FIELD_OPERATING_SYSTEM   = "operating_system";
+    public static final String       FIELD_HOSTNAME           = "hostname";
     public static final String       FIELD_SEARCH_PATH        = "search_path";
     public static final String       FIELD_CREATED_BY         = "created_by";
     public static final String       FIELD_BUILD_JDK          = "build_jdk";

@@ -24,7 +24,7 @@ import static eu.hansolo.javafinder.Constants.*;
 import static eu.hansolo.jdktools.Constants.*;
 
 
-public record SysInfo(OperatingSystem operatingSystem, Architecture architecture, OperatingMode operatingMode) {
+public record SysInfo(OperatingSystem operatingSystem, Architecture architecture, OperatingMode operatingMode, String hostname) {
 
     // ******************** Methods *******************************************
     public String toString(final OutputType outputType) throws IllegalArgumentException {
@@ -36,6 +36,8 @@ public record SysInfo(OperatingSystem operatingSystem, Architecture architecture
                                           .append(architecture().getUiString())
                                           .append(COMMA)
                                           .append(architecture().getBitness().getUiString())
+                                          .append(COMMA)
+                                          .append(hostname())
                                           .append(NEW_LINE)
                                           .toString();
             }
@@ -44,7 +46,8 @@ public record SysInfo(OperatingSystem operatingSystem, Architecture architecture
                                           .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
                                           .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(operatingSystem().getUiString()).append(QUOTES).append(COMMA)
                                           .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(architecture().getUiString()).append(QUOTES).append(COMMA)
-                                          .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(architecture().getBitness().getUiString()).append(QUOTES)
+                                          .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(architecture().getBitness().getUiString()).append(QUOTES).append(COMMA)
+                                          .append(QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(hostname()).append(QUOTES)
                                           .append(CURLY_BRACKET_CLOSE)
                                           .append(CURLY_BRACKET_CLOSE)
                                           .toString();

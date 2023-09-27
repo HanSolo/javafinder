@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import static eu.hansolo.javafinder.Constants.FIELD_ARCHITECTURE;
 import static eu.hansolo.javafinder.Constants.FIELD_BIT;
 import static eu.hansolo.javafinder.Constants.FIELD_DISTRIBUTIONS;
+import static eu.hansolo.javafinder.Constants.FIELD_HOSTNAME;
 import static eu.hansolo.javafinder.Constants.FIELD_OPERATING_SYSTEM;
 import static eu.hansolo.javafinder.Constants.FIELD_SEARCH_PATH;
 import static eu.hansolo.javafinder.Constants.FIELD_SYSINFO;
@@ -43,7 +44,7 @@ import static eu.hansolo.jdktools.Constants.INDENTED_QUOTES;
 
 
 public class Main {
-    private static final String VERSION = "17.0.29";
+    private static final String VERSION = "17.0.31";
     private        final Finder finder;
 
 
@@ -147,7 +148,8 @@ public class Main {
                                                 .append(INDENTED_QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN).append(NEW_LINE)
                                                 .append(INDENT).append(INDENTED_QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
                                                 .append(INDENT).append(INDENTED_QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
-                                                .append(INDENT).append(INDENTED_QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(NEW_LINE)
+                                                .append(INDENT).append(INDENTED_QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
+                                                .append(INDENT).append(INDENTED_QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.hostname()).append(QUOTES).append(NEW_LINE)
                                                 .append(INDENT).append(CURLY_BRACKET_CLOSE).append(COMMA_NEW_LINE)
                                                 .append(INDENTED_QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE)
                                                 .append(distros.stream().map(distro -> distro.toString(OutputType.BEAUTIFIED_JSON)).collect(Collectors.joining(COMMA_NEW_LINE)))
@@ -160,7 +162,8 @@ public class Main {
                                                 .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
                                                 .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA)
                                                 .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA)
-                                                .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES)
+                                                .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(COMMA)
+                                                .append(QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.hostname()).append(QUOTES)
                                                 .append(CURLY_BRACKET_CLOSE).append(COMMA)
                                                 .append(QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON)
                                                 .append(distros.stream().map(distro -> distro.toString(OutputType.JSON)).collect(Collectors.joining(COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE)))
