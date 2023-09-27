@@ -44,7 +44,7 @@ import static eu.hansolo.jdktools.Constants.INDENTED_QUOTES;
 
 
 public class Main {
-    private static final String VERSION = "17.0.31";
+    private static final String VERSION = "17.0.33";
     private        final Finder finder;
 
 
