@@ -21,7 +21,7 @@ jobs:
           distribution: 'graalvm-community'
 
       - name: Build native-image on Macos
-        run: native-image -cp classes:./build/libs/javafinder-17.0.35.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:./build/libs/javafinder-17.0.37.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
 
       - name: Grant execute permission for checksum-macos.sh
         run: chmod +x ./checksum-macos.sh
@@ -57,7 +57,7 @@ jobs:
           distribution: 'graalvm-community'
 
       - name: Build native-image on Linux
-        run: native-image -cp classes:./build/libs/javafinder-17.0.35.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:./build/libs/javafinder-17.0.37.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
 
       - name: Grant execute permission for checksum-linux.sh
         run: chmod +x ./checksum-linux.sh
@@ -93,7 +93,7 @@ jobs:
           distribution: 'graalvm-community'
 
       - name: Build native-image on Windows
-        run: native-image.cmd -jar ".\build\libs\javafinder-17.0.35.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
+        run: native-image.cmd -jar ".\build\libs\javafinder-17.0.37.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
 
       - name: Create checksum
         run: .\checksum-windows.bat
