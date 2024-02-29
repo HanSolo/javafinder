@@ -124,6 +124,28 @@ public class Finder {
         return distros;
     }
 
+    public Set<DistributionInfo> getActiveDistributions(final List<String> searchPaths) {
+        Set<DistributionInfo> distros = new HashSet<>();
+        if (null == searchPaths || searchPaths.isEmpty()) { return distros; }
+
+        if (service.isShutdown()) {
+            service = Executors.newSingleThreadExecutor();
+        }
+
+        searchPaths.forEach(searchPath -> {
+            final Path       path      = Paths.get(searchPath);
+            final List<Path> javaFiles = findFileByName(path, javaFile);
+            javaFiles.stream().forEach(java -> checkForActiveDistribution(java.toString(), distros));
+        });
+        service.shutdown();
+        try {
+            service.awaitTermination(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return distros;
+    }
+
     public OperatingSystem getOperatingSystem() { return operatingSystem; }
 
     public Architecture getArchitecture() { return architecture; }
@@ -197,10 +219,12 @@ public class Finder {
     public static final SysInfo getSysInfo() {
         final OperatingSystem operatingSystem = detectOperatingSystem();
         try {
-            final String         hostname       = getHostname();
-            final ProcessBuilder processBuilder = OperatingSystem.WINDOWS == operatingSystem ? new ProcessBuilder(WIN_DETECT_ARCH_CMDS) : new ProcessBuilder(UX_DETECT_ARCH_CMDS);
-            final Process        process        = processBuilder.start();
-            final String         result         = new BufferedReader(new InputStreamReader(process.getInputStream())).lines().collect(Collectors.joining("\n"));
+            final String              hostname       = getHostname();
+            final Map<String, String> envVariables   = System.getenv();
+            final ProcessBuilder      processBuilder = OperatingSystem.WINDOWS == operatingSystem ? new ProcessBuilder(WIN_DETECT_ARCH_CMDS) : new ProcessBuilder(UX_DETECT_ARCH_CMDS);
+            final Process             process        = processBuilder.start();
+            final String              result         = new BufferedReader(new InputStreamReader(process.getInputStream())).lines().collect(Collectors.joining("\n"));
+
             switch(operatingSystem) {
                 case WINDOWS -> {
                     ARCHITECTURE_MATCHER.reset(result);
@@ -208,37 +232,37 @@ public class Finder {
                     final int               noOfResults = results.size();
                     if (noOfResults > 0) {
                         final MatchResult   res = results.get(0);
-                        return new SysInfo(operatingSystem, Architecture.fromText(res.group(2)), OperatingMode.NATIVE, hostname);
+                        return new SysInfo(operatingSystem, Architecture.fromText(res.group(2)), OperatingMode.NATIVE, hostname, envVariables);
                     } else {
-                        return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NOT_FOUND, hostname);
+                        return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NOT_FOUND, hostname, envVariables);
                     }
                 }
-                case MACOS -> {
+                case MACOS   -> {
                     Architecture architecture = Architecture.fromText(result);
                     final ProcessBuilder processBuilder1 = new ProcessBuilder(MAC_DETECT_ROSETTA2_CMDS);
                     final Process        process1        = processBuilder1.start();
                     final String         result1         = new BufferedReader(new InputStreamReader(process1.getInputStream())).lines().collect(Collectors.joining("\n"));
-                    return new SysInfo(operatingSystem, architecture, result1.equals("1") ? OperatingMode.EMULATED : OperatingMode.NATIVE, hostname);
+                    return new SysInfo(operatingSystem, architecture, result1.equals("1") ? OperatingMode.EMULATED : OperatingMode.NATIVE, hostname, envVariables);
                 }
-                case LINUX -> {
-                    return new SysInfo(operatingSystem, Architecture.fromText(result), OperatingMode.NATIVE, hostname);
+                case LINUX   -> {
+                    return new SysInfo(operatingSystem, Architecture.fromText(result), OperatingMode.NATIVE, hostname, envVariables);
                 }
             }
 
             // If not found yet try via system property
             final String arch = Constants.OS_ARCH_PROPERTY;
-            if (arch.contains("sparc"))                           { return new SysInfo(operatingSystem, Architecture.SPARC, OperatingMode.NATIVE, hostname); }
-            if (arch.contains("amd64") || arch.contains("86_64")) { return new SysInfo(operatingSystem, Architecture.AMD64, OperatingMode.NATIVE, hostname); }
-            if (arch.contains("86"))                              { return new SysInfo(operatingSystem, Architecture.X86, OperatingMode.NATIVE, hostname); }
-            if (arch.contains("s390x"))                           { return new SysInfo(operatingSystem, Architecture.S390X, OperatingMode.NATIVE, hostname); }
-            if (arch.contains("ppc64"))                           { return new SysInfo(operatingSystem, Architecture.PPC64, OperatingMode.NATIVE, hostname); }
-            if (arch.contains("arm") && arch.contains("64"))      { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE, hostname); }
-            if (arch.contains("arm"))                             { return new SysInfo(operatingSystem, Architecture.ARM, OperatingMode.NATIVE, hostname); }
-            if (arch.contains("aarch64"))                         { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE, hostname); }
-            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE, hostname);
+            if (arch.contains("sparc"))                           { return new SysInfo(operatingSystem, Architecture.SPARC, OperatingMode.NATIVE, hostname, envVariables); }
+            if (arch.contains("amd64") || arch.contains("86_64")) { return new SysInfo(operatingSystem, Architecture.AMD64, OperatingMode.NATIVE, hostname, envVariables); }
+            if (arch.contains("86"))                              { return new SysInfo(operatingSystem, Architecture.X86, OperatingMode.NATIVE, hostname, envVariables); }
+            if (arch.contains("s390x"))                           { return new SysInfo(operatingSystem, Architecture.S390X, OperatingMode.NATIVE, hostname, envVariables); }
+            if (arch.contains("ppc64"))                           { return new SysInfo(operatingSystem, Architecture.PPC64, OperatingMode.NATIVE, hostname, envVariables); }
+            if (arch.contains("arm") && arch.contains("64"))      { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE, hostname, envVariables); }
+            if (arch.contains("arm"))                             { return new SysInfo(operatingSystem, Architecture.ARM, OperatingMode.NATIVE, hostname, envVariables); }
+            if (arch.contains("aarch64"))                         { return new SysInfo(operatingSystem, Architecture.AARCH64, OperatingMode.NATIVE, hostname, envVariables); }
+            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE, hostname, envVariables);
         } catch (IOException e) {
             e.printStackTrace();
-            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE, "-");
+            return new SysInfo(operatingSystem, Architecture.NOT_FOUND, OperatingMode.NATIVE, "-", new HashMap<>());
         }
     }
 
@@ -263,6 +287,10 @@ public class Finder {
             }
         }
         return hostname;
+    }
+
+    public static final Map<String, String> getEnvironmentVariables() {
+        return System.getenv();
     }
 
     public static final String getDefaultSearchPath() {
@@ -340,6 +368,8 @@ public class Finder {
                 String       feature         = "";
                 Boolean      fxBundled       = Boolean.FALSE;
                 //FPU          fpu              = FPU.UNKNOWN;
+
+                if (Files.isSymbolicLink(Path.of(parentPath))) { return; }
 
                 if (!this.javaHome.isEmpty() && !inUse.get() && parentPath.contains(javaHome)) {
                     inUse.set(true);
@@ -698,6 +728,408 @@ public class Finder {
                 }
 
                 DistributionInfo distributionFound = new DistributionInfo(now, distribution, name, apiString, version.toString(OutputFormat.REDUCED_COMPRESSED, true, true), Integer.toString(jdkVersion.getMajorVersion().getAsInt()), operatingSystem, architecture, fxBundled, parentPath, feature, buildScope, inUse.get(), usedBy);
+
+                distros.add(distributionFound);
+            });
+            service.submit(streamer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void checkForActiveDistribution(final String java, final Set<DistributionInfo> distros) {
+        Instant       now    = Instant.now();
+        AtomicBoolean inUse  = new AtomicBoolean(false);
+        List<String>  usedBy = new ArrayList<>();
+
+        try {
+            List<String> commands = new ArrayList<>();
+            commands.add(java);
+            commands.add("-version");
+
+            final String fileSeparator = File.separator;
+            final String binFolder     = new StringBuilder(fileSeparator).append("bin").append(fileSeparator).append(".*").toString();
+
+            ProcessBuilder builder  = new ProcessBuilder(commands).redirectErrorStream(true);
+            Process process;
+            try {
+                process = builder.start();
+            } catch (Exception e) {
+                //System.out.println("Not allowed to check: " + java);
+                return;
+            }
+            Streamer streamer = new Streamer(process.getInputStream(), d -> {
+                final String parentPath      = OperatingSystem.WINDOWS == this.operatingSystem ? java.replaceAll("bin\\\\java.exe", "") : java.replaceAll(binFolder, fileSeparator);
+                final File   releaseFile     = new File(parentPath + "release");
+                String[]     lines           = d.split("\\|");
+                String       name            = "Unknown build of OpenJDK";
+                Distribution distribution    = Distribution.NOT_FOUND;
+                String       apiString       = "";
+                String       operatingSystem = "";
+                String       architecture    = "";
+                String       feature         = "";
+                Boolean      fxBundled       = Boolean.FALSE;
+                //FPU          fpu              = FPU.UNKNOWN;
+
+                if (Files.isSymbolicLink(Path.of(parentPath))) { return; }
+
+                if (!this.javaHome.isEmpty() && !inUse.get() && parentPath.contains(javaHome)) {
+                    inUse.set(true);
+                }
+
+                final File jreLibExtFolder = new File(new StringBuilder(parentPath).append("jre").append(fileSeparator).append("lib").append(fileSeparator).append("ext").toString());
+                if (jreLibExtFolder.exists()) {
+                    fxBundled = Stream.of(jreLibExtFolder.listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).stream().filter(filename -> filename.equalsIgnoreCase("jfxrt.jar")).count() > 0;
+                }
+                final File jmodsFolder = new File(new StringBuilder(parentPath).append("jmods").toString());
+                if (jmodsFolder.exists()) {
+                    fxBundled = Stream.of(jmodsFolder.listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).stream().filter(filename -> filename.startsWith("javafx")).count() > 0;
+                }
+
+                VersionNumber version    = null;
+                VersionNumber jdkVersion = null;
+                BuildScope    buildScope = BuildScope.BUILD_OF_OPEN_JDK;
+
+                String line1         = lines[0];
+                String line2         = lines[1];
+                String withoutPrefix = line1;
+                if (line1.startsWith("openjdk")) {
+                    withoutPrefix = line1.replaceFirst("openjdk version", "");
+                } else if (line1.startsWith("java")) {
+                    withoutPrefix = line1.replaceFirst("java version", "");
+                    // Find new GraalVM build (former enterprise edition)
+                    if (line2.contains("GraalVM")) {
+                        name         = "GraalVM";
+                        apiString    = "graalvm";
+                        buildScope   = BuildScope.BUILD_OF_GRAALVM;
+                        distribution = Distribution.GRAALVM;
+                    } else {
+                        name       = "Oracle";
+                        apiString  = "oracle";
+                    }
+                }
+
+                // Find new GraalVM community builds
+                if (!apiString.equals("graalvm") && line2.contains("jvmci")) {
+                    VersionNumber newGraalVMBuild = VersionNumber.fromText("23.0-b12");
+                    VersionNumber graalvmBuildFound = VersionNumber.fromText(line2.substring(line2.indexOf("jvmci"), line2.length() - 1).replace("jvmci-", ""));
+                    if (graalvmBuildFound.compareTo(newGraalVMBuild) >= 0) {
+                        name         = "GraalVM Community";
+                        apiString    = "graalvm_community";
+                        buildScope   = BuildScope.BUILD_OF_GRAALVM;
+                        distribution = Distribution.GRAALVM_COMMUNITY;
+                    }
+                }
+
+                if (line2.contains("Zulu")) {
+                    name         = "Zulu";
+                    apiString    = "zulu";
+                    distribution = Distribution.ZULU;
+                    ZULU_BUILD_MATCHER.reset(line2);
+                    final List<MatchResult> results = ZULU_BUILD_MATCHER.results().collect(Collectors.toList());
+                    if (!results.isEmpty()) {
+                        MatchResult result = results.get(0);
+                        version = VersionNumber.fromText(result.group(2));
+                    }
+                } else if (line2.contains("Zing") || line2.contains("Prime")) {
+                    name         = "ZuluPrime";
+                    apiString    = "zulu_prime";
+                    distribution = Distribution.ZULU_PRIME;
+                    final List<MatchResult> results = ZULU_BUILD_MATCHER.results().collect(Collectors.toList());
+                    if (!results.isEmpty()) {
+                        MatchResult result = results.get(0);
+                        version = VersionNumber.fromText(result.group(2));
+                    }
+                } else if (line2.contains("Semeru")) {
+                    if (line2.contains("Certified")) {
+                        name         = "Semeru certified";
+                        apiString    = "semeru_certified";
+                        distribution = Distribution.SEMERU_CERTIFIED;
+                    } else {
+                        name         = "Semeru";
+                        apiString    = "semeru";
+                        distribution = Distribution.SEMERU;
+                    }
+                } else if (line2.contains("Tencent")) {
+                    name         = "Kona";
+                    apiString    = "kona";
+                    distribution = Distribution.KONA;
+                } else if (line2.contains("Bisheng")) {
+                    name         = "Bishenq";
+                    apiString    = "bisheng";
+                    distribution = Distribution.BISHENG;
+                } else if (line2.startsWith("Java(TM) SE")) {
+                    name         = "Oracle";
+                    apiString    = "oracle";
+                    distribution = Distribution.ORACLE;
+                }
+
+                if (null == version) {
+                    final String versionNumberText = withoutPrefix.substring(withoutPrefix.indexOf("\"") + 1, withoutPrefix.lastIndexOf("\""));
+                    final Semver semver            = Semver.fromText(versionNumberText).getSemver1();
+                    version = VersionNumber.fromText(semver.toString(true));
+                }
+                VersionNumber graalVersion = version;
+
+                releaseProperties.clear();
+                if (releaseFile.exists()) {
+                    try (FileInputStream propFile = new FileInputStream(releaseFile)) {
+                        releaseProperties.load(propFile);
+                    } catch (IOException ex) {
+                        System.out.println("Error reading release properties file. " + ex);
+                    }
+                    if (!releaseProperties.isEmpty()) {
+                        if (releaseProperties.containsKey("IMPLEMENTOR") && name.equals(Constants.UNKNOWN_BUILD_OF_OPENJDK)) {
+                            switch (releaseProperties.getProperty("IMPLEMENTOR").replaceAll("\"", "")) {
+                                case "AdoptOpenJDK" -> { name         = "Adopt OpenJDK";
+                                                         apiString    = "aoj";
+                                                         distribution = Distribution.AOJ;
+                                }
+                                case "Alibaba" -> { name         = "Dragonwell";
+                                                    apiString    = "dragonwell";
+                                                    distribution = Distribution.DRAGONWELL;
+                                }
+                                case "Amazon.com Inc." -> { name         = "Corretto";
+                                                            apiString    = "corretto";
+                                                            distribution = Distribution.CORRETTO;
+                                }
+                                case "Azul Systems, Inc." -> {
+                                    if (releaseProperties.containsKey("IMPLEMENTOR_VERSION")) {
+                                        final String implementorVersion = releaseProperties.getProperty("IMPLEMENTOR_VERSION");
+                                        if (implementorVersion.startsWith("Zulu")) {
+                                            name         = "Zulu";
+                                            apiString    = "zulu";
+                                            distribution = Distribution.ZULU;
+                                        } else if (implementorVersion.startsWith("Zing") || implementorVersion.startsWith("Prime")) {
+                                            name         = "ZuluPrime";
+                                            apiString    = "zulu_prime";
+                                            distribution = Distribution.ZULU_PRIME;
+                                        }
+                                    }
+                                }
+                                case "mandrel" -> { name         = "Mandrel";
+                                                    apiString    = "mandrel";
+                                                    distribution = Distribution.MANDREL;
+                                }
+                                case "Microsoft" -> { name         = "Microsoft";
+                                                      apiString    = "microsoft";
+                                                      distribution = Distribution.MICROSOFT;
+                                }
+                                case "ojdkbuild" -> { name         = "OJDK Build";
+                                                      apiString    = "ojdk_build";
+                                                      distribution = Distribution.OJDK_BUILD;
+                                }
+                                case "Oracle Corporation" -> { name         = "Oracle OpenJDK";
+                                                               apiString    = "oracle_openjdk";
+                                                               distribution = Distribution.ORACLE_OPEN_JDK;
+                                }
+                                case "Red Hat, Inc." -> { name         = "Red Hat";
+                                                          apiString    = "redhat";
+                                                          distribution = Distribution.RED_HAT;
+                                }
+                                case "SAP SE" -> { name         = "SAP Machine";
+                                                   apiString    = "sap_machine";
+                                                   distribution = Distribution.SAP_MACHINE;
+                                }
+                                case "OpenLogic" -> { name         = "OpenLogic";
+                                                      apiString    = "openlogic";
+                                                      distribution = Distribution.OPEN_LOGIC;
+                                }
+                                case "JetBrains s.r.o." -> { name         = "JetBrains";
+                                                             apiString    = "jetbrains";
+                                                             distribution = Distribution.JETBRAINS;
+                                }
+                                case "Eclipse Foundation" -> { name         = "Temurin";
+                                                               apiString    = "temurin";
+                                                               distribution = Distribution.TEMURIN;
+                                }
+                                case "Tencent" -> { name         = "Kona";
+                                                    apiString    = "kona";
+                                                    distribution = Distribution.KONA;
+                                }
+                                case "Bisheng" -> { name         = "Bisheng";
+                                                    apiString    = "bisheng";
+                                                    distribution = Distribution.BISHENG;
+                                }
+                                case "Debian" -> { name         = "Debian";
+                                                   apiString    = "debian";
+                                                   distribution = Distribution.DEBIAN;
+                                }
+                                case "Ubuntu" -> { name         = "Ubuntu";
+                                                   apiString    = "ubuntu";
+                                                   distribution = Distribution.UBUNTU;
+                                }
+                                case "N/A" -> { }/* Unknown */
+
+                            }
+                        }
+                        if (releaseProperties.containsKey("BUILD_TYPE")) {
+                            switch (releaseProperties.getProperty("BUILD_TYPE").replaceAll("\"", "")) {
+                                case "commercial" -> {
+                                    name         = "Oracle";
+                                    apiString    = "oracle";
+                                    distribution = Distribution.ORACLE;
+                                }
+                            }
+                        }
+                        if (releaseProperties.containsKey("OS_ARCH")) {
+                            architecture = releaseProperties.getProperty("OS_ARCH").toLowerCase().replaceAll("\"", "");
+                        }
+                        if (releaseProperties.containsKey("JVM_VARIANT")) {
+                            if (name == "Adopt OpenJDK") {
+                                String jvmVariant = releaseProperties.getProperty("JVM_VARIANT").toLowerCase().replaceAll("\"", "");
+                                if (jvmVariant.equals("dcevm")) {
+                                    name         = "Trava OpenJDK";
+                                    apiString    = "trava";
+                                    distribution = Distribution.TRAVA;
+                                } else if (jvmVariant.equals("openj9")) {
+                                    name         = "Adopt OpenJDK J9";
+                                    apiString    = "aoj_openj9";
+                                    distribution = Distribution.AOJ_OPENJ9;
+                                }
+                            }
+                        }
+                        if (releaseProperties.containsKey("OS_NAME")) {
+                            switch (releaseProperties.getProperty("OS_NAME").toLowerCase().replaceAll("\"", "")) {
+                                case "darwin" -> operatingSystem = "macos";
+                                case "linux" -> operatingSystem = "linux";
+                                case "windows" -> operatingSystem = "windows";
+                            }
+                        }
+                        if (releaseProperties.containsKey("MODULES") && !fxBundled) {
+                            fxBundled = (releaseProperties.getProperty("MODULES").contains("javafx"));
+                        }
+                    /*
+                    if (releaseProperties.containsKey("SUN_ARCH_ABI")) {
+                        String abi = releaseProperties.get("SUN_ARCH_ABI").toString();
+                        switch (abi) {
+                            case "gnueabi"   -> fpu = FPU.SOFT_FLOAT;
+                            case "gnueabihf" -> fpu = FPU.HARD_FLOAT;
+                        }
+                    }
+                    */
+                    }
+                }
+
+                if (lines.length > 2) {
+                    String line3 = lines[2].toLowerCase();
+                    for (String feat : Constants.FEATURES) {
+                        if (line3.contains(feat)) {
+                            feature = feat;
+                            break;
+                        }
+                    }
+
+                }
+
+                if (name.equalsIgnoreCase("Mandrel")) {
+                    buildScope = BuildScope.BUILD_OF_GRAALVM;
+                    if (releaseProperties.containsKey("JAVA_VERSION")) {
+                        final String javaVersion = releaseProperties.getProperty("JAVA_VERSION");
+                        if (null == jdkVersion) { jdkVersion = VersionNumber.fromText(javaVersion); }
+                    }
+                }
+
+                if (name.equals(Constants.UNKNOWN_BUILD_OF_OPENJDK) && lines.length > 2) {
+                    String line3      = lines[2].toLowerCase();
+                    File   readmeFile = new File(parentPath + "readme.txt");
+                    if (readmeFile.exists()) {
+                        try {
+                            List<String> readmeLines = Helper.readTextFileToList(readmeFile.getAbsolutePath());
+                            if (readmeLines.stream().filter(l -> l.toLowerCase().contains("liberica native image kit")).count() > 0) {
+                                name         = "Liberica Native";
+                                apiString    = "liberica_native";
+                                distribution = Distribution.LIBERICA_NATIVE;
+                                buildScope   = BuildScope.BUILD_OF_GRAALVM;
+
+                                GRAALVM_VERSION_MATCHER.reset(line3);
+                                final List<MatchResult> results = GRAALVM_VERSION_MATCHER.results().collect(Collectors.toList());
+                                if (!results.isEmpty()) {
+                                    MatchResult result = results.get(0);
+                                    version = VersionNumber.fromText(result.group(2));
+                                }
+                                if (releaseProperties.containsKey("JAVA_VERSION")) {
+                                    final String javaVersion = releaseProperties.getProperty("JAVA_VERSION");
+                                    if (null == jdkVersion) { jdkVersion = VersionNumber.fromText(javaVersion); }
+                                }
+                            } else if (readmeLines.stream().filter(l -> l.toLowerCase().contains("liberica")).count() > 0) {
+                                name         = "Liberica";
+                                apiString    = "liberica";
+                                distribution = Distribution.LIBERICA;
+                            }
+                        } catch (IOException e) {
+
+                        }
+                    } else {
+                        if (line3.contains("graalvm") && !apiString.equals("graalvm_community") && !apiString.equals("graalvm")) {
+                            name = "GraalVM CE";
+                            String distroPreFix = "graalvm_ce";
+                            if (releaseProperties.containsKey("IMPLEMENTOR")) {
+                                switch (releaseProperties.getProperty("IMPLEMENTOR").replaceAll("\"", "")) {
+                                    case "GraalVM Community" -> {
+                                        name         = "GraalVM CE";
+                                        distroPreFix = "graalvm_ce";
+                                        distribution = Distribution.GRAALVM_CE;
+                                    }
+                                    case "GraalVM Enterprise" -> {
+                                        name         = "GraalVM";
+                                        distroPreFix = "graalvm";
+                                        distribution = Distribution.GRAALVM_EE;
+                                    }
+                                }
+                            }
+                            apiString  = graalVersion.getMajorVersion().getAsInt() >= 8 ? distroPreFix + graalVersion.getMajorVersion().getAsInt() : "";
+                            buildScope = BuildScope.BUILD_OF_GRAALVM;
+
+                            GRAALVM_VERSION_MATCHER.reset(line3);
+                            final List<MatchResult> results = GRAALVM_VERSION_MATCHER.results().collect(Collectors.toList());
+                            if (!results.isEmpty()) {
+                                MatchResult result = results.get(0);
+                                version = VersionNumber.fromText(result.group(2));
+                            }
+
+                            if (releaseProperties.containsKey("VENDOR")) {
+                                final String vendor = releaseProperties.getProperty("VENDOR").toLowerCase().replaceAll("\"", "");
+                                if (vendor.equalsIgnoreCase("Gluon")) {
+                                    name         = "Gluon GraalVM CE";
+                                    apiString    = "gluon_graalvm";
+                                    distribution = Distribution.GLUON_GRAALVM;
+                                }
+                            }
+                            if (releaseProperties.containsKey("JAVA_VERSION")) {
+                                final String javaVersion = releaseProperties.getProperty("JAVA_VERSION");
+                                if (null == jdkVersion) { jdkVersion = VersionNumber.fromText(javaVersion); }
+                            }
+                        } else if (line3.contains("microsoft")) {
+                            name         = "Microsoft";
+                            apiString    = "microsoft";
+                            distribution = Distribution.MICROSOFT;
+                        } else if (line3.contains("corretto")) {
+                            name         = "Corretto";
+                            apiString    = "corretto";
+                            distribution = Distribution.CORRETTO;
+                        } else if (line3.contains("temurin")) {
+                            name         = "Temurin";
+                            apiString    = "temurin";
+                            distribution = Distribution.TEMURIN;
+                        }
+                    }
+                }
+
+                if (null == jdkVersion) { jdkVersion = version; }
+
+                if (architecture.isEmpty()) { architecture = this.architecture.name().toLowerCase(); }
+
+                // Check if found distro is in use
+                for (ProcessInfo processInfo : usedDistros) {
+                    if (java.contains(processInfo.cmd())) {
+                        inUse.set(true);
+                        usedBy.add(processInfo.cmdLine());
+                        break;
+                    }
+                }
+
+                DistributionInfo distributionFound = new DistributionInfo(now, distribution, name, apiString, version.toString(OutputFormat.REDUCED_COMPRESSED, true, true), Integer.toString(jdkVersion.getMajorVersion().getAsInt()), operatingSystem, architecture, fxBundled, parentPath, feature, buildScope, true, usedBy);
 
                 distros.add(distributionFound);
             });

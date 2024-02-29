@@ -39,7 +39,7 @@ You can download the latest binaries [here](https://github.com/HanSolo/javafinde
 
 
 ### Requirements to build the binary yourself
-- A build of OpenJDK 17 (org greater than 17)
+- A build of OpenJDK 21 (org greater than 21)
 - GraalVM CE (to build the native image)
 
 ### Build jar file
@@ -48,7 +48,7 @@ Execute the following command in the project folder
 ```./gradlew clean build```
 
 You will find the jar file in the ```build/lib``` folder:
-- ```javafinder-17.0.37.jar```
+- ```javafinder-21.0.0.jar```
 
 <br>
 
@@ -56,7 +56,7 @@ You will find the jar file in the ```build/lib``` folder:
 To build a native image, make sure you have GraalVM installed with the native-image option
 
 #### Shell
-```native-image -cp classes:build/libs/javafinder-17.0.37.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback```
+```native-image -cp classes:build/libs/javafinder-21.0.0.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback```
 
 <br>
 

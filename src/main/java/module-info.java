@@ -1,5 +1,5 @@
 module eu.hansolo.javafinder {
-    requires eu.hansolo.jdktools;
+    requires transitive eu.hansolo.jdktools;
 
     exports eu.hansolo.javafinder;
 }

@@ -20,15 +20,18 @@ import eu.hansolo.jdktools.Architecture;
 import eu.hansolo.jdktools.OperatingMode;
 import eu.hansolo.jdktools.OperatingSystem;
 
+import java.util.Map;
+
 import static eu.hansolo.javafinder.Constants.*;
 import static eu.hansolo.jdktools.Constants.*;
 
 
-public record SysInfo(OperatingSystem operatingSystem, Architecture architecture, OperatingMode operatingMode, String hostname) {
+public record SysInfo(OperatingSystem operatingSystem, Architecture architecture, OperatingMode operatingMode, String hostname, Map<String,String> envVariables) {
 
     // ******************** Methods *******************************************
     public String toString(final OutputType outputType) throws IllegalArgumentException {
         if (null == outputType) { throw new IllegalArgumentException("outputType cannot be null"); }
+
         switch (outputType) {
             case CSV -> {
                 return new StringBuilder().append(operatingSystem().getUiString())
@@ -42,15 +45,23 @@ public record SysInfo(OperatingSystem operatingSystem, Architecture architecture
                                           .toString();
             }
             default -> {
-                return new StringBuilder().append(CURLY_BRACKET_OPEN)
-                                          .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
-                                          .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(operatingSystem().getUiString()).append(QUOTES).append(COMMA)
-                                          .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(architecture().getUiString()).append(QUOTES).append(COMMA)
-                                          .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(architecture().getBitness().getUiString()).append(QUOTES).append(COMMA)
-                                          .append(QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(hostname()).append(QUOTES)
-                                          .append(CURLY_BRACKET_CLOSE)
-                                          .append(CURLY_BRACKET_CLOSE)
-                                          .toString();
+                final StringBuilder msgBuilder = new StringBuilder();
+                msgBuilder.append(CURLY_BRACKET_OPEN)
+                          .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
+                          .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(operatingSystem().getUiString()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(architecture().getUiString()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(architecture().getBitness().getUiString()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(hostname()).append(QUOTES).append(COMMA)
+                          .append(QUOTES).append("environt_variables").append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN);
+
+                envVariables.entrySet().forEach(entry -> msgBuilder.append(QUOTES).append(entry.getKey()).append(QUOTES).append(COLON).append(QUOTES).append(entry.getValue()).append(QUOTES).append(COMMA));
+                if (!envVariables.isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 1); }
+
+                msgBuilder.append(CURLY_BRACKET_CLOSE)
+                          .append(CURLY_BRACKET_CLOSE)
+                          .append(CURLY_BRACKET_CLOSE);
+
+                return msgBuilder.toString();
             }
         }
     }

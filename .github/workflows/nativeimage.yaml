@@ -5,10 +5,10 @@ jobs:
     runs-on: [ macos-latest ]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: zulu
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
@@ -17,11 +17,11 @@ jobs:
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm-community'
 
       - name: Build native-image on Macos
-        run: native-image -cp classes:./build/libs/javafinder-17.0.37.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:./build/libs/javafinder-21.0.0.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
 
       - name: Grant execute permission for checksum-macos.sh
         run: chmod +x ./checksum-macos.sh
@@ -41,10 +41,10 @@ jobs:
     runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up latest JDK 17
+      - name: Set up latest JDK 21
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: zulu
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
@@ -53,11 +53,11 @@ jobs:
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm-community'
 
       - name: Build native-image on Linux
-        run: native-image -cp classes:./build/libs/javafinder-17.0.37.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+        run: native-image -cp classes:./build/libs/javafinder-21.0.0.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
 
       - name: Grant execute permission for checksum-linux.sh
         run: chmod +x ./checksum-linux.sh
@@ -77,10 +77,10 @@ jobs:
     runs-on: [ windows-latest ]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up latest JDK 17
+      - name: Set up latest JDK 21
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: zulu
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
@@ -89,11 +89,11 @@ jobs:
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm-community'
 
       - name: Build native-image on Windows
-        run: native-image.cmd -jar ".\build\libs\javafinder-17.0.37.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
+        run: native-image.cmd -jar ".\build\libs\javafinder-21.0.0.jar" --initialize-at-build-time=Constants --no-server -H:Name=javafinder --no-fallback --static
 
       - name: Create checksum
         run: .\checksum-windows.bat

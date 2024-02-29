@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 
 public class Helper {
-    public static List<String> readTextFileToList(final String filename) throws IOException {
+    public static final List<String> readTextFileToList(final String filename) throws IOException {
         final Path           path   = Paths.get(filename);
         final BufferedReader reader = Files.newBufferedReader(path);
         return reader.lines().collect(Collectors.toList());

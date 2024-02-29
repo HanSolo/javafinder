@@ -18,6 +18,7 @@ package eu.hansolo.javafinder;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,16 +36,16 @@ import static eu.hansolo.jdktools.Constants.COMMA;
 import static eu.hansolo.jdktools.Constants.COMMA_NEW_LINE;
 import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_CLOSE;
 import static eu.hansolo.jdktools.Constants.CURLY_BRACKET_OPEN;
+import static eu.hansolo.jdktools.Constants.INDENT;
+import static eu.hansolo.jdktools.Constants.INDENTED_QUOTES;
 import static eu.hansolo.jdktools.Constants.NEW_LINE;
 import static eu.hansolo.jdktools.Constants.QUOTES;
 import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_CLOSE;
 import static eu.hansolo.jdktools.Constants.SQUARE_BRACKET_OPEN;
-import static eu.hansolo.jdktools.Constants.INDENT;
-import static eu.hansolo.jdktools.Constants.INDENTED_QUOTES;
 
 
 public class Main {
-    private static final String VERSION = "17.0.37";
+    private static final String VERSION = "21.0.0";
     private        final Finder finder;
 
 
@@ -64,6 +65,8 @@ public class Main {
 
         // System information
         final SysInfo sysInfo = Finder.getSysInfo();
+
+        boolean findActivesOnly = false;
 
         // JDK distributions
         String     searchPath = "";
@@ -88,6 +91,9 @@ public class Main {
                                        javafinder -v
                                        -> Shows the version
                                        
+                                       javafinder -ao
+                                       -> Scan processes for active java installations
+                                       
                                        javafinder OUTPUTFORMAT PATH
                                        
                                        OUTPUTFORMAT: csv, json
@@ -100,7 +106,15 @@ public class Main {
                                        
                                        javafinder json c:\\
                                        
+                                       javafinder csv c:\\ -a
+                                       
+                                       javafinder json c:\\ -ao
+                                       
                                        javafinder c:\\
+                                       
+                                       javafinder c:\\ -a
+                                       
+                                       javafinder c:\\ -ao
                                        
                                        javafinder /System/Volumes/Data/Library/Java/JavaVirtualMachines
                                        """);
@@ -114,6 +128,9 @@ public class Main {
                 } else if (firstArgument.equals("json")) {
                     outputType = OutputType.BEAUTIFIED_JSON;
                     searchPath = Finder.getDefaultSearchPath();
+                } else if (firstArgument.equals("-ao") || firstArgument.equals("-AO")) {
+                    findActivesOnly = true;
+                    searchPath      = Finder.getDefaultSearchPath();
                 } else {
                     searchPath = firstArgument;
                 }
@@ -126,6 +143,8 @@ public class Main {
             }
         }
 
+
+
         // Check for valid searchPath
         final File f = new File(searchPath);
         if (!f.exists() || !f.isDirectory()) {
@@ -133,7 +152,28 @@ public class Main {
             System.exit(1);
         }
 
-        Set<DistributionInfo> distros = finder.getDistributions(List.of(searchPath));
+        List<String> actives = new ArrayList<>();
+        ProcessMonitor processMonitor = new ProcessMonitor();
+        actives.addAll(processMonitor.runOnce());
+
+        Set<DistributionInfo> activeDistros = finder.getActiveDistributions(actives);
+        Set<DistributionInfo> distros;
+
+        if (findActivesOnly) {
+            distros = activeDistros;
+        } else {
+            distros = finder.getDistributions(List.of(searchPath));
+            for (DistributionInfo activedistro : activeDistros) {
+                distros.stream().filter(distro -> distro.equals(activedistro)).forEach(distro -> {
+                    distro.setActive(true);
+                    if (activedistro.usedBy() != distro.usedBy()) {
+                        distro.usedBy().addAll(activedistro.usedBy());
+                    }
+                });
+            }
+            //distros.stream().filter(distro -> activeDistros.contains(distro)).forEach(distro -> distro.setActive(true));
+            activeDistros.stream().filter(activeDistro -> !distros.contains(activeDistro)).forEach(activeDistro -> distros.add(activeDistro));
+        }
 
         StringBuilder msgBuilder;
         switch(outputType) {
@@ -141,7 +181,7 @@ public class Main {
                 msgBuilder = new StringBuilder().append("Vendor,Distribution,Version,Timestamp,Path,Type,InUse,Timestamp")
                                                 .append(NEW_LINE)
                                                 .append(distros.stream().map(distro -> distro.toString(OutputType.CSV)).collect(Collectors.joining()));
-            case BEAUTIFIED_JSON ->
+            case BEAUTIFIED_JSON -> {
                 msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN).append(NEW_LINE)
                                                 .append(INDENTED_QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp).append(COMMA_NEW_LINE)
                                                 .append(INDENTED_QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath.replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA_NEW_LINE)
@@ -149,25 +189,42 @@ public class Main {
                                                 .append(INDENT).append(INDENTED_QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
                                                 .append(INDENT).append(INDENTED_QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
                                                 .append(INDENT).append(INDENTED_QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(COMMA_NEW_LINE)
-                                                .append(INDENT).append(INDENTED_QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.hostname()).append(QUOTES).append(NEW_LINE)
-                                                .append(INDENT).append(CURLY_BRACKET_CLOSE).append(COMMA_NEW_LINE)
-                                                .append(INDENTED_QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE)
-                                                .append(distros.stream().map(distro -> distro.toString(OutputType.BEAUTIFIED_JSON)).collect(Collectors.joining(COMMA_NEW_LINE)))
-                                                .append(NEW_LINE).append(INDENT).append(SQUARE_BRACKET_CLOSE).append(NEW_LINE)
-                                                .append(CURLY_BRACKET_CLOSE);
-            default ->
-                msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN)
-                                                .append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp).append(COMMA)
+                                                .append(INDENT).append(INDENTED_QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.hostname()).append(QUOTES).append(COMMA).append(NEW_LINE)
+                                                .append(INDENT).append(INDENTED_QUOTES).append("environt_variables").append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN).append(NEW_LINE);
+
+                sysInfo.envVariables().entrySet().forEach(entry -> msgBuilder.append(INDENT).append(INDENT).append(INDENT).append(QUOTES).append(entry.getKey()).append(QUOTES).append(COLON).append(QUOTES).append(entry.getValue()).append(QUOTES).append(COMMA_NEW_LINE));
+                if (!sysInfo.envVariables().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 2); }
+
+                msgBuilder.append(NEW_LINE).append(INDENT).append(INDENT).append(CURLY_BRACKET_CLOSE).append(NEW_LINE)
+                          .append(INDENT).append(CURLY_BRACKET_CLOSE).append(COMMA_NEW_LINE)
+                          .append(INDENTED_QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON).append(SQUARE_BRACKET_OPEN).append(NEW_LINE)
+                          .append(distros.stream().map(distro -> distro.toString(OutputType.BEAUTIFIED_JSON)).collect(Collectors.joining(COMMA_NEW_LINE)))
+                          .append(NEW_LINE).append(INDENT).append(SQUARE_BRACKET_CLOSE).append(NEW_LINE)
+                          .append(CURLY_BRACKET_CLOSE);
+            }
+            default -> {
+                msgBuilder = new StringBuilder().append(CURLY_BRACKET_OPEN).append(QUOTES).append(FIELD_TIMESTAMP).append(QUOTES).append(COLON).append(timestamp).append(COMMA)
                                                 .append(QUOTES).append(FIELD_SEARCH_PATH).append(QUOTES).append(COLON).append(QUOTES).append(searchPath.replaceAll("\\\\", "\\\\\\\\")).append(QUOTES).append(COMMA)
                                                 .append(QUOTES).append(FIELD_SYSINFO).append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN)
                                                 .append(QUOTES).append(FIELD_OPERATING_SYSTEM).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.operatingSystem().getUiString()).append(QUOTES).append(COMMA)
                                                 .append(QUOTES).append(FIELD_ARCHITECTURE).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getUiString()).append(QUOTES).append(COMMA)
                                                 .append(QUOTES).append(FIELD_BIT).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.architecture().getBitness().getUiString()).append(QUOTES).append(COMMA)
-                                                .append(QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.hostname()).append(QUOTES)
-                                                .append(CURLY_BRACKET_CLOSE).append(COMMA)
-                                                .append(QUOTES).append(FIELD_DISTRIBUTIONS).append(QUOTES).append(COLON)
-                                                .append(distros.stream().map(distro -> distro.toString(OutputType.JSON)).collect(Collectors.joining(COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE)))
-                                                .append(CURLY_BRACKET_CLOSE);
+                                                .append(QUOTES).append(FIELD_HOSTNAME).append(QUOTES).append(COLON).append(QUOTES).append(sysInfo.hostname()).append(QUOTES).append(COMMA)
+                                                .append(QUOTES).append("environt_variables").append(QUOTES).append(COLON).append(CURLY_BRACKET_OPEN);
+
+                sysInfo.envVariables().entrySet().forEach(entry -> msgBuilder.append(QUOTES).append(entry.getKey()).append(QUOTES).append(COLON).append(QUOTES).append(entry.getValue()).append(QUOTES).append(COMMA));
+                if (!sysInfo.envVariables().isEmpty()) { msgBuilder.setLength(msgBuilder.length() - 1); }
+
+                msgBuilder.append(NEW_LINE).append(CURLY_BRACKET_CLOSE)
+                          .append(CURLY_BRACKET_CLOSE)
+                          .append(COMMA)
+                          .append(QUOTES)
+                          .append(FIELD_DISTRIBUTIONS)
+                          .append(QUOTES)
+                          .append(COLON)
+                          .append(distros.stream().map(distro -> distro.toString(OutputType.JSON)).collect(Collectors.joining(COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE)))
+                          .append(CURLY_BRACKET_CLOSE);
+            }
         }
 
         // Output

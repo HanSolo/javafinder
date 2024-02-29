@@ -17,6 +17,7 @@
 package eu.hansolo.javafinder;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 
 public class Constants {
@@ -39,6 +40,8 @@ public class Constants {
     public static final String       FIELD_SEARCH_PATH        = "search_path";
     public static final String       FIELD_CREATED_BY         = "created_by";
     public static final String       FIELD_BUILD_JDK          = "build_jdk";
+    public static final Pattern      JAVA_PATH_PATTERN        = Pattern.compile("^(.*/java)\\s");
+    public static final Pattern      JAVA_PATH_PATTERN_WIN    = Pattern.compile("^(.*\\\\java\\.exe)\\s");
     public static final String       RESET_COLOR              = "\u001B[0m";
     public static final String       BLACK                    = "\033[0;30m";
     public static final String       RED                      = "\033[0;31m";
