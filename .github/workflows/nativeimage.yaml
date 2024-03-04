@@ -4,9 +4,9 @@ jobs:
   build-macos:
     runs-on: [ macos-latest ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: zulu
@@ -29,20 +29,55 @@ jobs:
         run: ./checksum-macos.sh
 
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: javafinder-mac-x64
           path: |
             javafinder
             javafinder.sha256
+            
 
+  build-macos-aarch64:
+    runs-on: [ macos-14 ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: zulu
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Build with Gradle
+        run: ./gradlew build --scan
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm-community'
+
+      - name: Build native-image on Macos
+        run: native-image -cp classes:./build/libs/javafinder-21.0.0.jar --initialize-at-build-time=Constants -H:Name=javafinder eu.hansolo.javafinder.Main --no-fallback
+
+      - name: Grant execute permission for checksum-macos.sh
+        run: chmod +x ./checksum-macos.sh
+      - name: Create checksum
+        run: ./checksum-macos.sh
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: javafinder-mac-aarch64
+          path: |
+            javafinder
+            javafinder.sha256
 
   build-linux:
     runs-on: [ ubuntu-latest ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up latest JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: zulu
@@ -65,7 +100,7 @@ jobs:
         run: ./checksum-linux.sh
 
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: javafinder-linux-x64
           path: |
@@ -76,9 +111,9 @@ jobs:
   build-windows:
     runs-on: [ windows-latest ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up latest JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: zulu
@@ -99,7 +134,7 @@ jobs:
         run: .\checksum-windows.bat
 
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: javafinder-windows-x64
           path: |
